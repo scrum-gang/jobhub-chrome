@@ -1,2 +1,1 @@
-# jobhub-chrome
-Chrome extension for the JobHub service
+# Chrome Reason React
