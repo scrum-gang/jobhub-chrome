@@ -84,18 +84,16 @@ typings/
 .dynamodb/
 
 #reason
-.DS_Store
-/node_modules*
-finalOutput/*.js
 .merlin
-/lib/bs/
-/lib/ocaml/
+/node_modules/
+/dist/
+/lib/*
+!/lib/js/*
+/build/
 *.log
+.DS_Store
 .bsb.lock
-/src/*.js
-node_modules
-build
-secrets.*.js
+.vscode/
 
 # Editor
 /.idea/
