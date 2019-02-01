@@ -98,3 +98,6 @@ typings/
 # Editor
 /.idea/
 .vscode
+
+# camilo's file 
+jsconfig.json
