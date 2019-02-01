@@ -14,7 +14,7 @@ type action =
 
 let reducer = (action, state) =>
   switch (action) {
-  | Login => ReasonReact.Update({ route: JobApp})
+  | Login => ReasonReact.Update({route: JobApp})
   | Logout => ReasonReact.Update({route: Login})
   };
 
