@@ -24,8 +24,8 @@ let make = _children => {
     <div>
       (
         switch (self.state.route) {
-        | Login => <LoginPage />
-        | JobApp => <JobAppPage />
+        | Login => <Login />
+        | JobApp => <JobApp />
         }
       )
       <div>
