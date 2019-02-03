@@ -10,26 +10,92 @@
   <title>Getting Started Extension's Popup</title>
   <style type="text/css">
     body {
-      margin: 10px;
-      white-space: nowrap;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+        "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+        sans-serif;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
 
-    h1 {
-      font-size: 15px;
+    .app {
+      text-align:center;
+      align-items:center;
+      background-color:#f0f1f3;
+      display:flex;
+      flex-direction:column;
+      font-size:calc(15px+2vmin);
+      justify-content:center;
+      padding:10px;
     }
 
-    #container {
-      align-items: center;
-      display: flex;
-      justify-content: space-between;
+    form {
+      align-items:stretch;
+      display:flex;
+      flex-flow:column wrap;
+      justify-content:space-around;
+      padding:0;
+      width:300px;
+    }
+
+    input {
+      border-radius:4px;
+      border-width:1px;
+      font-weight:400;
+      line-height:30px;
+      margin:5px 0;
+      padding-left:10px;
+    }
+
+    .btn {
+      border:none;
+      border-radius:4px;
+      color:#FFF;
+      font-weight:600;
+      line-height:40px;
+      margin:5px 0;
+      padding:0;
+      transition:all .1s;
+      padding: 0;
+    }
+
+    .submit-btn {
+      background:#2782be;
+    }
+    .signout-btn {
+      background:#be2727;
+    }
+
+    .submit-btn:hover {
+      background: #2e96db;
+    }
+    .signout-btn:hover {
+      background: #db2e2e;
+    }
+
+    .form-separator {
+      display:flex;
+      flex-direction:row;
+    }
+
+    .form-separator:before,.form-separator:after {
+      border-bottom:1px solid #5d5f5f;
+      content:"";
+      flex:1 1;
+      margin:auto;
+    }
+
+    .form-separator-txt {
+      color: #5d5f5f;
+      font-size:calc(15px+1vmin);
+      margin:0 5px;
     }
   </style>
-
 </head>
 
 <body>
-  <div id="container">
-  </div>
+  <div id="container"></div>
   <!--
       - JavaScript and HTML must be in separate files: see our Content Security
       - Policy documentation[1] for details and explanation.
