@@ -1,6 +1,6 @@
 type route =
-  | Login
-  | JobApp;
+  | LoginPage
+  | JobAppPage;
 
 type state = {route};
 
@@ -10,8 +10,8 @@ type action =
 
 let reducer = (action, _state) =>
   switch (action) {
-  | Login => ReasonReact.Update({route: JobApp})
-  | Logout => ReasonReact.Update({route: Login})
+  | Login => ReasonReact.Update({route: JobAppPage})
+  | Logout => ReasonReact.Update({route: LoginPage})
   };
 
 let component = ReasonReact.reducerComponent("App");
@@ -19,32 +19,16 @@ let component = ReasonReact.reducerComponent("App");
 let make = _children => {
   ...component,
   reducer,
-  initialState: () => {route: Login},
+  initialState: () => {route: LoginPage},
   render: self =>
-    <div>
+    <div className="app">
       (
         switch (self.state.route) {
-        | Login => <Login />
-        | JobApp => <JobApp />
+        | LoginPage => <Login submitHandler=(_event => self.send(Login)) />
+        | JobAppPage => <JobApp
+                          submitHandler=(_event => self.send(Logout))
+                          signOutHandler=(_event => self.send(Logout)) />
         }
       )
-      <div>
-        <button
-          onClick=(
-            switch (self.state.route) {
-            | Login => (_event => self.send(Login))
-            | JobApp => (_event => self.send(Logout))
-            }
-          )>
-          (
-            ReasonReact.stringToElement(
-              switch (self.state.route) {
-              | Login => "Login"
-              | JobApp => "Logout"
-              },
-            )
-          )
-        </button>
-      </div>
     </div>,
 };
