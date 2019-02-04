@@ -1,7 +1,7 @@
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
-    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-    sans-serif;
+  "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+  sans-serif;
   margin: 0;
   padding: 0;
   -webkit-font-smoothing: antialiased;
@@ -42,7 +42,7 @@ input {
   border-radius:4px;
   color:#FFF;
   font-weight:600;
-  line-height:40px;
+  line-height:35px;
   margin:5px 0;
   padding:0;
   transition:all .1s;
@@ -63,20 +63,52 @@ input {
   background: #db2e2e;
 }
 
-.form-separator {
+.form-vertical-separator {
   display:flex;
   flex-direction:row;
 }
 
-.form-separator:before,.form-separator:after {
+.form-vertical-separator:before,.form-vertical-separator:after {
   border-bottom:1px solid #5d5f5f;
   content:"";
   flex:1 1;
   margin:auto;
 }
 
-.form-separator-txt {
+.form-vertical-separator-txt {
   color: #5d5f5f;
   font-size:calc(15px+1vmin);
   margin:0 5px;
+}
+
+
+.form-horizontal-separator {
+  display:flex;
+  flex-direction:row;
+}
+
+label{
+  font-weight: 300;
+  font-size: 1.35em;
+  margin: 5px auto;
+  height: 25px;
+  -webkit-transition: all 0.25s linear;
+}
+
+label:hover{
+  color: #5c5b5b;
+}
+
+input[type="radio"] {
+  margin-right: 10px;
+}
+
+[type="date"] {
+  background:#fff url(https://cdn1.iconfinder.com/data/icons/cc_mono_icon_set/blacks/16x16/calendar_2.png) 97% 50% no-repeat ;
+}
+[type="date"]::-webkit-inner-spin-button {
+  display: none;
+}
+[type="date"]::-webkit-calendar-picker-indicator {
+  opacity: 0;
 }
