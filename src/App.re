@@ -21,30 +21,13 @@ let make = _children => {
   reducer,
   initialState: () => {route: Login},
   render: self =>
-    <div>
+    <div className="app">
       (
         switch (self.state.route) {
-        | Login => <LoginPage />
-        | JobApp => <JobAppPage />
+        | Login => <Login submitHandler=(_event => self.send(Login)) />
+        | JobApp => <JobApp submitHandler=(_event => self.send(Logout))
+                            signOutHandler=(_event => self.send(Logout)) />
         }
       )
-      <div>
-        <button
-          onClick=(
-            switch (self.state.route) {
-            | Login => (_event => self.send(Login))
-            | JobApp => (_event => self.send(Logout))
-            }
-          )>
-          (
-            ReasonReact.stringToElement(
-              switch (self.state.route) {
-              | Login => "Login"
-              | JobApp => "Logout"
-              },
-            )
-          )
-        </button>
-      </div>
     </div>,
 };

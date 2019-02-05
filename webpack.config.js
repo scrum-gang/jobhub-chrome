@@ -11,7 +11,8 @@ module.exports = {
     new CopyWebpackPlugin([
       { from: 'manifest.json'},
       { from: 'icon.png' },
-      { from: 'popup.html' }
+      { from: 'popup.html' },
+      { from: './src/App.css' }
     ])
   ]
 };
