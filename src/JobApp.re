@@ -1,19 +1,43 @@
-let component = ReasonReact.statelessComponent("JobApp");
+type state = {url: string};
+
+type action =
+  | UpdateUrl(string);
+
+let reducer = (action, _state) =>
+  switch (action) {
+  | UpdateUrl(value) => ReasonReact.Update({url: value})
+  };
+
+let id = x => x;
+
+let component = ReasonReact.reducerComponent("JobApp");
 
 let make = (~submitHandler, ~signOutHandler, _children) => {
   ...component, /* spread the template's other defaults into here  */
-  render: _self =>
+  reducer,
+  initialState: () => {url: ""},
+  render: _self => {
+    let sendUrl = x => _self.send(UpdateUrl(x));
     <div>
       <form>
-        <input name="company" placeholder="company" tabIndex=1 />
+        <input name="company" placeholder="company" tabIndex=2 />
         <input name="position" placeholder="position" tabIndex=2 />
-        <input _type="url" name="url" placeholder="url" tabIndex=3 />
+        <ScrapingInput
+          script="document.URL"
+          typeValue="url"
+          validationFn=id
+          processFn=(x => Js.String.make(x))
+          reducerFn=sendUrl
+          name="url"
+          placeholder="url"
+          value=_self.state.url
+        />
         <div className="form-horizontal-separator">
-          <label>(ReasonReact.stringToElement("Date posted"))</label>
-            <input _type="date"  name="dateposted" tabIndex=4 />
+          <label> (ReasonReact.stringToElement("Date posted")) </label>
+          <input _type="date" name="dateposted" tabIndex=4 />
         </div>
         <div className="form-horizontal-separator">
-          <label>(ReasonReact.stringToElement("Deadline"))</label>
+          <label> (ReasonReact.stringToElement("Deadline")) </label>
           <input _type="date" name="deadline" tabIndex=5 />
         </div>
         <div className="form-horizontal-separator">
@@ -29,16 +53,15 @@ let make = (~submitHandler, ~signOutHandler, _children) => {
         <button className="btn submit-btn" onClick=submitHandler tabIndex=8>
           (ReasonReact.stringToElement("Submit"))
         </button>
-
         <span className="form-vertical-separator">
           <p className="form-vertical-separator-txt">
             (ReasonReact.stringToElement("or"))
           </p>
         </span>
-
         <button className="btn signout-btn" onClick=signOutHandler tabIndex=8>
           (ReasonReact.stringToElement("Sign Out"))
         </button>
       </form>
-    </div>,
+    </div>;
+  },
 };
