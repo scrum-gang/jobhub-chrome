@@ -1,12 +1,5 @@
 open Chrome.Extensions;
 
-/* Get rid of the need for returning a promise every time we use `then_` */
-let thenResolve = fn =>
-  Js.Promise.then_(value => Js.Promise.resolve(fn(value)));
-
-/* Get rid of pesky compiler warnings at the end of a side-effectful promise chain */
-let thenIgnore = (fn, p) => thenResolve(value => fn(value), p) |> ignore;
-
 /** Convert value from event to string */
 let valueFromEvent = evt : string => (
                                        evt
