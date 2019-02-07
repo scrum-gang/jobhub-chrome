@@ -61,23 +61,23 @@ let make = (~submitHandler, ~signOutHandler, _children) => {
         />
         <div className="form-horizontal-separator">
           <label> (ReasonReact.stringToElement("Date posted")) </label>
-          <input _type="date" name="dateposted" tabIndex=4 />
+          <input _type="date" name="dateposted" />
         </div>
         <div className="form-horizontal-separator">
           <label> (ReasonReact.stringToElement("Deadline")) </label>
-          <input _type="date" name="deadline" tabIndex=5 />
+          <input _type="date" name="deadline" />
         </div>
         <div className="form-horizontal-separator">
           <label>
-            <input _type="radio" name="status" value="applied" tabIndex=6 />
+            <input _type="radio" name="status" value="applied" />
             (ReasonReact.stringToElement("Applied"))
           </label>
           <label>
-            <input _type="radio" name="status" value="toApply" tabIndex=7 />
+            <input _type="radio" name="status" value="toApply" />
             (ReasonReact.stringToElement("To apply"))
           </label>
         </div>
-        <button className="btn submit-btn" onClick=submitHandler tabIndex=8>
+        <button className="btn submit-btn" onClick=submitHandler>
           (ReasonReact.stringToElement("Submit"))
         </button>
         <span className="form-vertical-separator">
@@ -85,7 +85,7 @@ let make = (~submitHandler, ~signOutHandler, _children) => {
             (ReasonReact.stringToElement("or"))
           </p>
         </span>
-        <button className="btn signout-btn" onClick=signOutHandler tabIndex=8>
+        <button className="btn signout-btn" onClick=signOutHandler>
           (ReasonReact.stringToElement("Sign Out"))
         </button>
       </form>
