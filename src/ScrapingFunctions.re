@@ -27,7 +27,10 @@ let validateNonNull = x =>
 
 let toStringProcess = x => Js.String.make(x);
 
-let validateUrl = x => {
-  let stringUrl = Js.String.make(x |> validateNonNull);
+let checkValidUrl = x => {
+  let stringUrl = x |> Js.String.make;
   Js.Re.test(stringUrl, regexConstant) ? x : failwith("Invalid URL");
 };
+
+let validateUrl = x =>
+  x |> validateNonNull |> toStringProcess |> checkValidUrl;
