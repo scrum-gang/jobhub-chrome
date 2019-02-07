@@ -1,6 +1,7 @@
 open Chrome.Extensions;
 
-/** Convert value from event to string */
+/** Convert value from event to string
+One of the disadvantages from reason is that you have to do this type casting */
 let valueFromEvent = evt => (
                               evt
                               |> ReactEventRe.Form.target
@@ -26,6 +27,8 @@ let scrape = (script, validationFn, processFn, reducerFn) => {
       switch (result |> validationFn) {
       | item => item |> processFn |> reducerFn
       | exception (Js.Exn.Error(err)) =>
+        /**Fancy stuff so that the error displays as red in the console
+        and there's a default validation message if needed */
         Js.Exn.message(err)
         |> Js.Option.getWithDefault("Validation failed")
         |> Js.log
@@ -51,7 +54,7 @@ let make =
   ...component,
   didMount: _self =>
     ReasonReact.SideEffects(
-      self => scrape(script, validationFn, processFn, reducerFn),
+      _self => scrape(script, validationFn, processFn, reducerFn),
     ),
   render: _self =>
     <input
