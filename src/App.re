@@ -25,8 +25,11 @@ let make = _children => {
       (
         switch (self.state.route) {
         | Login => <Login submitHandler=(_event => self.send(Login)) />
-        | JobApp => <JobApp submitHandler=(_event => self.send(Logout))
-                            signOutHandler=(_event => self.send(Logout)) />
+        | JobApp =>
+          <JobApp
+            submitHandler=(_event => self.send(Logout))
+            signOutHandler=(_event => self.send(Logout))
+          />
         }
       )
     </div>,
