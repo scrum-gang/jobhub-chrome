@@ -1,33 +1,60 @@
-type state = {url: string};
+type state = {
+  url: string,
+  company: string,
+  position: string,
+};
 
 type action =
-  | UpdateUrl(string);
+  | UpdateUrl(string)
+  | UpdateCompany(string)
+  | UpdatePosition(string);
 
 let reducer = (action, _state) =>
   switch (action) {
-  | UpdateUrl(value) => ReasonReact.Update({url: value})
+  | UpdateUrl(value) => ReasonReact.Update({..._state, url: value})
+  | UpdateCompany(value) => ReasonReact.Update({..._state, company: value})
+  | UpdatePosition(value) => ReasonReact.Update({..._state, position: value})
   };
-
-let id = x => x;
 
 let component = ReasonReact.reducerComponent("JobApp");
 
 let make = (~submitHandler, ~signOutHandler, _children) => {
   ...component, /* spread the template's other defaults into here  */
   reducer,
-  initialState: () => {url: ""},
+  initialState: () => {url: "", company: "", position: ""},
   render: _self => {
-    let sendUrl = x => _self.send(UpdateUrl(x));
+    /** Event handlers which function as sort of dispatchers */
+    let changeUrl = x => _self.send(UpdateUrl(x));
+    let changeCompany = x => _self.send(UpdateCompany(x));
+    let changePosition = x => _self.send(UpdatePosition(x));
     <div>
       <form>
-        <input name="company" placeholder="company" tabIndex=2 />
-        <input name="position" placeholder="position" tabIndex=2 />
         <ScrapingInput
-          script="document.URL"
+          script=ScrapingFunctions.scriptCompany
+          typeValue="text"
+          validationFn=ScrapingFunctions.validateNonNull
+          processFn=ScrapingFunctions.toStringProcess
+          reducerFn=changeCompany
+          name="company"
+          placeholder="company"
+          value=_self.state.company
+        />
+        <ScrapingInput
+          script=ScrapingFunctions.scriptPosition
+          typeValue="text"
+          validationFn=ScrapingFunctions.validateNonNull
+          processFn=ScrapingFunctions.toStringProcess
+          reducerFn=changePosition
+          name="position"
+          placeholder="position"
+          value=_self.state.position
+        />
+        <ScrapingInput
+          script=ScrapingFunctions.scriptUrl
           typeValue="url"
-          validationFn=id
-          processFn=(x => Js.String.make(x))
-          reducerFn=sendUrl
+          validationFn=ScrapingFunctions.validateUrl
+          processFn=ScrapingFunctions.toStringProcess
+          reducerFn=changeUrl
           name="url"
           placeholder="url"
           value=_self.state.url
