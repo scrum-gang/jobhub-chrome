@@ -64,7 +64,6 @@ let make =
       name
       placeholder
       value
-      tabIndex=1
       /*** Ideally, I would've passed a separate prop such as a "dispatcher" function,
            but honestly for the complexity of our app, I wouldn't bother  */
       onChange=(evt => valueFromEvent(evt) |> reducerFn)

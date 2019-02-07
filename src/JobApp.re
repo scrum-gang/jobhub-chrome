@@ -22,11 +22,11 @@ let make = (~submitHandler, ~signOutHandler, _children) => {
   ...component, /* spread the template's other defaults into here  */
   reducer,
   initialState: () => {url: "", company: "", position: ""},
-  render: _self => {
+  render: self => {
     /** Event handlers which function as sort of dispatchers */
-    let changeUrl = x => _self.send(UpdateUrl(x));
-    let changeCompany = x => _self.send(UpdateCompany(x));
-    let changePosition = x => _self.send(UpdatePosition(x));
+    let changeUrl = x => self.send(UpdateUrl(x));
+    let changeCompany = x => self.send(UpdateCompany(x));
+    let changePosition = x => self.send(UpdatePosition(x));
     <div>
       <form>
         <ScrapingInput
@@ -37,7 +37,7 @@ let make = (~submitHandler, ~signOutHandler, _children) => {
           reducerFn=changeCompany
           name="company"
           placeholder="company"
-          value=_self.state.company
+          value=self.state.company
         />
         <ScrapingInput
           script=ScrapingFunctions.scriptPosition
@@ -47,7 +47,7 @@ let make = (~submitHandler, ~signOutHandler, _children) => {
           reducerFn=changePosition
           name="position"
           placeholder="position"
-          value=_self.state.position
+          value=self.state.position
         />
         <ScrapingInput
           script=ScrapingFunctions.scriptUrl
@@ -57,7 +57,7 @@ let make = (~submitHandler, ~signOutHandler, _children) => {
           reducerFn=changeUrl
           name="url"
           placeholder="url"
-          value=_self.state.url
+          value=self.state.url
         />
         <div className="form-horizontal-separator">
           <label> (ReasonReact.stringToElement("Date posted")) </label>

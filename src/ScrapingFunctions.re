@@ -1,7 +1,5 @@
 /** For checking if a URL is valid */
-let regexConstant = [%bs.re
-  "/^((?:https?:\/\/)?[^./]+(?:\.[^./]+)+(?:\/.*)?)$/"
-];
+let urlRegex = [%bs.re "/^((?:https?:\/\/)?[^./]+(?:\.[^./]+)+(?:\/.*)?)$/"];
 
 let scriptUrl = "document.URL";
 
@@ -29,8 +27,7 @@ let toStringProcess = x => Js.String.make(x);
 
 let checkValidUrl = x => {
   let stringUrl = x |> Js.String.make;
-  Js.Re.test(stringUrl, regexConstant) ? x : failwith("Invalid URL");
+  Js.Re.test(stringUrl, urlRegex) ? x : failwith("Invalid URL");
 };
 
-let validateUrl = x =>
-  x |> validateNonNull |> toStringProcess |> checkValidUrl;
+let validateUrl = x => x |> validateNonNull |> checkValidUrl;
