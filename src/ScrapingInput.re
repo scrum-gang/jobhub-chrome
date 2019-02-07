@@ -8,6 +8,10 @@ let valueFromEvent = evt => (
                               |> ReactDOMRe.domElementToObj
                             )##value;
 
+type scrapingReturn('a) =
+  | None
+  | Some('a);
+
 /** This is where all the scraping beauty happens
 MAKE SURE THAT WHATEVER SCRIPT YOU'RE PASSING, IT RETURNS A VALUE,
 WHICH YOU CAN THEN MANIPULATE IN PROCESSFN AND VALIDATE IN VALIDATIONFN
@@ -18,12 +22,10 @@ let scrape = (script, validationFn, processFn, reducerFn) => {
   let scriptDetails = Tabs.mkScriptDetails(~code=script, ());
   Tabs.executeScriptWithCallback(
     scriptDetails,
-    /** Cannot make "result" a nullable because of the way the author of the bindings defined his return types,
-    don't want to mess with his libraries
-    This sacrifices proper validation with Option types or even monadic error handling,
-    I could probably make this return a nullable, but that's too much trouble */
     result => {
-      let result = result[0];
+      /** Type casting to option type to get around the bad bindings the original author of the
+      Chrome bindings provided */
+      let result = result[0] |> Obj.magic |> Js.Nullable.toOption;
       switch (result |> validationFn) {
       | item => item |> processFn |> reducerFn
       | exception (Js.Exn.Error(err)) =>
