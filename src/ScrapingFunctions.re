@@ -9,12 +9,12 @@ let scriptCompany = "document.h1";
 
 /** Idea: gather all headers, find which one is the largest -- this one usually indicates the role for which one is applying  */
 /** NOTE: MAKE SURE TO DEFINE FUNCTIONS AS VAR, SO THAT THE CODE CAN REDECLARE THE FUNCTIONS EVERY TIME THE PAGE IS RENDERED */
-let scriptPosition = "  var getAreaAndText = el => ({ area: el.getBoundingClientRect().width * el.getBoundingClientRect().height, text: el.innerText });
+let scriptPosition = "  var getAreaAndText = el => ({ fontSize: (window.getComputedStyle(el, null).getPropertyValue('font-size')), text: el.innerText });
                         var retrieveHeader = header => Array.prototype.slice.call(document.getElementsByTagName(header)).map(getAreaAndText);
 
                         [...retrieveHeader('h1'), ...retrieveHeader('h2'), ...retrieveHeader('h3'),
                         ...retrieveHeader('h4'), ...retrieveHeader('h5'), ...retrieveHeader('h6')]
-                        .filter(Boolean).sort((a, b) => b.area - a.area)[0].text";
+                        .filter(Boolean).sort((a, b) => b.fontSize - a.fontSize)[0].text";
 
 /** Error checking with comfy optional types  */
 let validateNonNull = x =>
