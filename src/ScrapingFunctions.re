@@ -11,11 +11,14 @@ let scriptCompany = "document.h1";
 /** NOTE: MAKE SURE TO DEFINE FUNCTIONS AS VAR, SO THAT THE CODE CAN REDECLARE THE FUNCTIONS EVERY TIME THE PAGE IS RENDERED */
 let scriptPosition = "  var getAreaAndText = el => ({ fontSize: parseFloat(window.getComputedStyle(el, null).getPropertyValue('font-size')), text: el.innerText });
                         var isVisible = el => el.offsetWidth > 0 || el.offsetHeight > 0;
-                        var retrieveHeader = header => Array.prototype.slice.call(document.getElementsByTagName(header)).filter(isVisible).map(getAreaAndText);
+                        var retrieveHeader = header => Array.prototype.slice.call(document.getElementsByTagName(header))
+                                                      .filter(isVisible)
+                                                      .map(getAreaAndText);
 
                         [...retrieveHeader('h1'), ...retrieveHeader('h2'), ...retrieveHeader('h3'),
                         ...retrieveHeader('h4'), ...retrieveHeader('h5'), ...retrieveHeader('h6')]
-                        .filter(Boolean).sort((a, b) => b.fontSize - a.fontSize)[0].text";
+                        .filter(el => el.text)
+                        .sort((a, b) => b.fontSize - a.fontSize)[0].text";
 
 /** Error checking with comfy optional types  */
 let validateNonNull = x =>
