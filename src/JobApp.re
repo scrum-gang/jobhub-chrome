@@ -77,6 +77,11 @@ let make = (~submitHandler, ~signOutHandler, _children) => {
             (ReasonReact.stringToElement("To apply"))
           </label>
         </div>
+        <select>
+          <option value="0">(ReasonReact.stringToElement("Used CV"))</option>
+          <option value="1">(ReasonReact.stringToElement("TODO"))</option>
+          <option value="2">(ReasonReact.stringToElement("TODO"))</option>
+        </select>
         <button className="btn submit-btn" onClick=submitHandler>
           (ReasonReact.stringToElement("Submit"))
         </button>

@@ -1,22 +1,30 @@
+:root {
+  --baseBg:#fafafa;
+  --baseBorder:#5d5f5f;
+  --baseFontSize:calc(10% + 15px);
+  --negativeBg:#be2727;
+  --negativeFg:#d43434;
+  --positiveBg:#2782be;
+  --positiveFg:#3ba4ee;
+  --radius:4px;
+}
+
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
-  "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-  sans-serif;
-  margin: 0;
-  padding: 0;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  font-family:"Arial", "Helvetica", sans-serif;
+  margin:0;
+  padding:0;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
 }
 
 .app {
-  text-align:center;
   align-items:center;
-  background-color:#f0f1f3;
+  background-color:var(--baseBg);
   display:flex;
   flex-direction:column;
-  font-size:calc(15px+2vmin);
   justify-content:center;
   padding:10px;
+  text-align:center;
 }
 
 form {
@@ -29,38 +37,38 @@ form {
 }
 
 input {
-  border-radius:4px;
+  border-radius:var(--radius);
   border-width:1px;
   font-weight:400;
   line-height:30px;
-  margin:5px 0;
+  margin:7px 0;
   padding-left:10px;
 }
 
 .btn {
   border:none;
-  border-radius:4px;
-  color:#FFF;
+  border-radius:var(--radius);
+  color:var(--baseBg);
+  font-size:var(--baseFontSize);
   font-weight:600;
   line-height:35px;
-  margin:5px 0;
+  margin:7px 0;
   padding:0;
   transition:all .1s;
-  padding: 0;
 }
 
 .submit-btn {
-  background:#2782be;
+  background:var(--positiveBg);
 }
 .signout-btn {
-  background:#be2727;
+  background:var(--negativeBg);
 }
 
 .submit-btn:hover {
-  background: #2e96db;
+  background:var(--positiveFg);
 }
 .signout-btn:hover {
-  background: #db2e2e;
+  background:var(--negativeFg);
 }
 
 .form-vertical-separator {
@@ -69,18 +77,17 @@ input {
 }
 
 .form-vertical-separator:before,.form-vertical-separator:after {
-  border-bottom:1px solid #5d5f5f;
+  border-bottom:1px solid var(--baseBorder);
   content:"";
   flex:1 1;
   margin:auto;
 }
 
 .form-vertical-separator-txt {
-  color: #5d5f5f;
-  font-size:calc(15px+1vmin);
+  color:var(--baseBorder);
+  font-size:var(--baseFontSize);
   margin:0 5px;
 }
-
 
 .form-horizontal-separator {
   display:flex;
@@ -88,27 +95,70 @@ input {
 }
 
 label{
-  font-weight: 300;
-  font-size: 1.35em;
-  margin: 5px auto;
-  height: 25px;
-  -webkit-transition: all 0.25s linear;
+  font-size:var(--baseFontSize);
+  margin:auto;
+  -webkit-transition:all 0.25s linear;
 }
 
 label:hover{
-  color: #5c5b5b;
+  color:#5c5b5b;
 }
 
 input[type="radio"] {
-  margin-right: 10px;
+  margin-right:10px;
 }
 
-[type="date"] {
-  background:#fff url(https://cdn1.iconfinder.com/data/icons/cc_mono_icon_set/blacks/16x16/calendar_2.png) 97% 50% no-repeat ;
+input[type="date"] {
+  background:var(--baseBg) url(https://cdn1.iconfinder.com/data/icons/cc_mono_icon_set/blacks/16x16/calendar_2.png) 97% 50% no-repeat ;
 }
-[type="date"]::-webkit-inner-spin-button {
-  display: none;
+input[type="date"]::-webkit-inner-spin-button {
+  display:none;
 }
-[type="date"]::-webkit-calendar-picker-indicator {
-  opacity: 0;
+input[type="date"]::-webkit-calendar-picker-indicator {
+  opacity:0;
+}
+
+select {
+  appearance:none;
+  background-color:var(--baseBg);
+  border:1px solid var(--baseBorder);
+  border-radius:var(--radius);
+  color:var(--baseBorder);
+  display:block;
+  line-height:1;
+  margin:10px auto;
+  outline:0;
+  padding:0.65em 2.5em 0.55em 0.75em;
+  width:80%;
+  -webkit-appearance:none;
+  /* style for the dropdown arrow*/
+  background-image:linear-gradient(var(--baseBorder), var(--baseBorder)),
+    linear-gradient(-135deg, transparent 50%, var(--positiveBg) 50%),
+    linear-gradient(-225deg, transparent 50%, var(--positiveBg) 50%),
+    linear-gradient(var(--positiveBg) 42%, var(--baseBg) 42%);
+  background-repeat:no-repeat, no-repeat, no-repeat, no-repeat;
+  background-size:1px 100%, 20px 22px, 20px 22px, 20px 100%;
+  background-position:right 20px center, right bottom, right bottom, right bottom;
+}
+
+option {
+  background:var(--baseBg);
+  color:var(--baseBorder);
+  font-size:var(--baseFontSize);
+  margin:5px;
+  padding:5px;
+}
+
+/* style for the dropdown arrow*/
+select:hover {
+  background-image:linear-gradient(var(--positiveFg), var(--positiveFg)),
+    linear-gradient(-135deg, transparent 50%, var(--positiveFg) 50%),
+    linear-gradient(-225deg, transparent 50%, var(--positiveFg) 50%),
+    linear-gradient(var(--positiveFg) 42%, var(--baseBg) 42%);
+}
+select:active {
+  background-image:linear-gradient(var(--positiveFg), var(--positiveFg)),
+    linear-gradient(-135deg, transparent 50%, var(--positiveFg) 50%),
+    linear-gradient(-225deg, transparent 50%, var(--positiveFg) 50%),
+    linear-gradient(var(--positiveFg) 42%, var(--baseBg) 42%);
 }
