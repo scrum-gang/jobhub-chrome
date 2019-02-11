@@ -39,44 +39,30 @@ let toStringProcess = x => Js.String.make(x);
 
 /** return the date x days ago in the format yyyy-MM-dd */
 let daysAgoDate = (x: string) => {
-  let now = Js.Date.make();
 
-  /** ISO date format is yyyy-MM-ddThh:mm:ss:msms.nnnZ, we only need the first 10 characters*/
-  let startIsoOfset = 0;
-  let lengthIsoOfset = 10;
-
-  switch (Js.Date.getDate(now) -. float_of_int(int_of_string(x))) {
-  | delta => Js.Date.setDate(now, delta)
-    |> Js.Date.fromFloat
+  /** formats a float date to a yyyy-MM-dd string */
+  let formatDate = date => Js.Date.fromFloat(date)
     |> Js.Date.toISOString
-    /** unfortunately Js.Date has no method to obtain format yyyy-MMM-dd
-       so we obtain the ISO format and extract the substring of interest */
-    |> Js.String.substrAtMost(~from=startIsoOfset, ~length=lengthIsoOfset);
-  | exception (Js.Exn.Error(err)) =>
-      Js.Exn.message(err)
-      |> Js.Option.getWithDefault("Unable to cast string to date")
-      /** trick to be able to log while still returning a string */
-      |> Js.log; "";
-  };
+    |> {
+      /** ISO date format is yyyy-MM-ddThh:mm:ss:msms.nnnZ, we only need the first 10 characters*/
+      let startIsoOfset = 0;
+      let lengthIsoOfset = 10;
+      Js.String.substrAtMost(~from=startIsoOfset, ~length=lengthIsoOfset);
+    };
+
+  let now = Js.Date.make();
+  let delta = (Js.Date.getDate(now) -. float_of_int(int_of_string(x)));
+  Js.Float.isNaN(delta) ? "" : Js.Date.setDate(now, delta) |> formatDate;
 };
 
 let extractPostedDateProcess = x: string => {
   let stringBody = x |> Js.String.make;
 
-  /** extract the first match from a Regex execution result */
-  let extractFirstMatch = (x: Js.Re.result) => Js.Re.captures(x)[1] |> Js.Nullable.toOption;
-
-  /** Unfortunately there is no single method in the Js.Re API to execute and obtain
-     the matched strings. So it's a 2 step process: exec the Regex, then capture the match */
-  switch (Js.Re.exec(stringBody, postedDateRegex)) {
-  /** trick to be able to log while still returning a string */
-  | None => Js.log("Unable to find posted date"); "";
-  | Some(x) =>
-    switch (extractFirstMatch(x)) {
-    | None => "";
-    | Some(x) => daysAgoDate(x);
+  Js.String.match(postedDateRegex, stringBody)
+    |> result => switch (result) {
+      | None => ""
+      | Some(match) => daysAgoDate(match[1])
     };
-  };
 };
 
 let checkValidUrl = x => {
