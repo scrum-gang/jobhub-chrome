@@ -6,6 +6,8 @@ let urlRegex = [%bs.re "/^((?:https?:\/\/)?[^./]+(?:\.[^./]+)+(?:\/.*)?)$/"];
     are often posted dates for other offers being advertized.*/
 let postedDateRegex = [%bs.re "/(\d+)[\s]+day[s]?[\s]+ago/im"];
 
+let capitalLetterRegex = [%bs.re "/([A-Z][a-z]+)/"];
+
 let scriptUrl = "document.URL";
 
 /** TODO: Need to find some good logic for this,
@@ -27,6 +29,8 @@ let scriptPosition = "  var getAreaAndText = el => ({ fontSize: parseFloat(windo
 
 /** Error checking with comfy optional types */
 let scriptBody = "document.body.innerHTML";
+
+let scriptText = "document.body.innerHTML.textContent";
 
 let validateNonNull = x =>
   switch (x) {
@@ -63,7 +67,30 @@ let extractPostedDateProcess = x : string => {
   };
 };
 
-let checkValidUrl = x: string => {
+let extractCompaniesProcess = (companies: array(string), body: string) => {
+  let filterArray = (~f, arr) =>
+    arr |> ArrayLabels.to_list |> ListLabels.filter(~f) |> ArrayLabels.of_list;
+  let stringBody = body |> Js.String.make;
+  let result = Js.String.splitByRe(capitalLetterRegex, stringBody);
+  /** I can't find a method which returns ALL matchines of a string as substrings, so I have to first split the
+  string by regex, and then again filter those elements which are not html tags and match the regex */
+  /**TODO: method which processes the filtered array of keywords and matches the best company
+  1. Build dict of companies - frequency
+  2. Don't add to array if frequency of word = 0
+  3. Filter by most frequent in dict */
+  (
+    switch (result) {
+    | [||] => ""
+    | value =>
+      Js.log(
+        filterArray(~f=x => Js.Re.test(x, capitalLetterRegex), result),
+      );
+      "";
+    }
+  );
+};
+
+let checkValidUrl = x => {
   let stringUrl = x |> Js.String.make;
   Js.Re.test(stringUrl, urlRegex) ? x : failwith("Invalid URL");
 };

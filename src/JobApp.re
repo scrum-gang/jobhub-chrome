@@ -38,7 +38,8 @@ let make = (~submitHandler, ~signOutHandler, _children) => {
   },
   didMount: self => {
     let setCompanyNames = x => self.send(UpdateCompanyNames(x));
-    ReasonReact.SideEffects(
+    ReasonReact.UpdateWithSideEffects(
+      self.state,
       _self => Services.loadCompanyNames(setCompanyNames),
     );
   },
@@ -50,16 +51,28 @@ let make = (~submitHandler, ~signOutHandler, _children) => {
     let changePostedDate = x => self.send(UpdatePostedDate(x));
     <div>
       <form>
-        <ScrapingInput
-          script=ScrapingFunctions.scriptCompany
-          typeValue="text"
-          validationFn=ScrapingFunctions.validateNonNull
-          processFn=ScrapingFunctions.toStringProcess
-          reducerFn=changeCompany
-          name="company"
-          placeholder="company"
-          value=self.state.company
-        />
+        (
+          switch (self.state.companies) {
+          | [||] => ReasonReact.stringToElement("Loading")
+          | _ =>
+            <ScrapingInput
+              script=ScrapingFunctions.scriptBody
+              typeValue="text"
+              validationFn=ScrapingFunctions.validateNonNull
+              processFn=(
+                x =>
+                  ScrapingFunctions.extractCompaniesProcess(
+                    self.state.companies,
+                    x,
+                  )
+              )
+              reducerFn=changeCompany
+              name="company"
+              placeholder="company"
+              value=self.state.company
+            />
+          }
+        )
         <ScrapingInput
           script=ScrapingFunctions.scriptPosition
           typeValue="text"
