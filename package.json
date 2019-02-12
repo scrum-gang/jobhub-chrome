@@ -16,6 +16,8 @@
   "author": "Alexander Bratyshkin & Camilo Garcia La Rotta",
   "license": "MIT",
   "dependencies": {
+    "@glennsl/bs-json": "^1.0.1",
+    "bs-fetch": "^0.3.1",
     "react": "^15.4.2",
     "react-dom": "^15.4.2",
     "reason-react": "^0.3.4"

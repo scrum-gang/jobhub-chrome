@@ -26,7 +26,6 @@ let scriptPosition = "  var getAreaAndText = el => ({ fontSize: parseFloat(windo
                         .sort((a, b) => b.fontSize - a.fontSize)[0].text";
 
 /** Error checking with comfy optional types */
-
 let scriptBody = "document.body.innerHTML";
 
 let validateNonNull = x =>
@@ -51,13 +50,12 @@ let formatDate = date => Js.Date.fromFloat(date)
 /** return the date x days ago in the format yyyy-MM-dd */
 let daysAgoDate = x: string => {
   let now = Js.Date.make();
-  let delta = (Js.Date.getDate(now) -. float_of_int(int_of_string(x)));
+  let delta = Js.Date.getDate(now) -. float_of_int(int_of_string(x));
   Js.Float.isNaN(delta) ? "" : Js.Date.setDate(now, delta) |> formatDate;
 };
 
-let extractPostedDateProcess = x: string => {
+let extractPostedDateProcess = x : string => {
   let stringBody = x |> Js.String.make;
-
   let result = Js.String.match(postedDateRegex, stringBody);
   switch (result) {
   | None => ""
@@ -72,7 +70,8 @@ let checkValidUrl = x: string => {
 
 let checkValidPostedDate = x: string => {
   let stringUrl = x |> Js.String.make;
-  Js.Re.test(stringUrl, postedDateRegex) ? x : failwith("Unable to find posted date");
+  Js.Re.test(stringUrl, postedDateRegex) ?
+    x : failwith("Unable to find posted date");
 };
 
 /** if the string contains a valide url it will return the input string
