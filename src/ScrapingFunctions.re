@@ -38,19 +38,18 @@ let validateNonNull = x =>
 /** Note: toStringProcess(None) => "0" */
 let toStringProcess = x => Js.String.make(x);
 
+/** formats a float date to a yyyy-MM-dd string */
+let formatDate = date => Js.Date.fromFloat(date)
+  |> Js.Date.toISOString
+  |> {
+    /** ISO date format is yyyy-MM-ddThh:mm:ss:msms.nnnZ, we only need the first 10 characters*/
+    let startIsoOfset = 0;
+    let lengthIsoOfset = 10;
+    Js.String.substrAtMost(~from=startIsoOfset, ~length=lengthIsoOfset);
+  };
+
 /** return the date x days ago in the format yyyy-MM-dd */
 let daysAgoDate = (x: string) => {
-
-  /** formats a float date to a yyyy-MM-dd string */
-  let formatDate = date => Js.Date.fromFloat(date)
-    |> Js.Date.toISOString
-    |> {
-      /** ISO date format is yyyy-MM-ddThh:mm:ss:msms.nnnZ, we only need the first 10 characters*/
-      let startIsoOfset = 0;
-      let lengthIsoOfset = 10;
-      Js.String.substrAtMost(~from=startIsoOfset, ~length=lengthIsoOfset);
-    };
-
   let now = Js.Date.make();
   let delta = (Js.Date.getDate(now) -. float_of_int(int_of_string(x)));
   Js.Float.isNaN(delta) ? "" : Js.Date.setDate(now, delta) |> formatDate;
