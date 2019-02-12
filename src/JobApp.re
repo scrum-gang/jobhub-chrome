@@ -2,18 +2,21 @@ type state = {
   url: string,
   company: string,
   position: string,
+  postedDate: string,
 };
 
 type action =
   | UpdateUrl(string)
   | UpdateCompany(string)
-  | UpdatePosition(string);
+  | UpdatePosition(string)
+  | UpdatePostedDate(string);
 
 let reducer = (action, _state) =>
   switch (action) {
   | UpdateUrl(value) => ReasonReact.Update({..._state, url: value})
   | UpdateCompany(value) => ReasonReact.Update({..._state, company: value})
   | UpdatePosition(value) => ReasonReact.Update({..._state, position: value})
+  | UpdatePostedDate(value) => ReasonReact.Update({..._state, postedDate: value})
   };
 
 let component = ReasonReact.reducerComponent("JobApp");
@@ -21,12 +24,13 @@ let component = ReasonReact.reducerComponent("JobApp");
 let make = (~submitHandler, ~signOutHandler, _children) => {
   ...component, /* spread the template's other defaults into here  */
   reducer,
-  initialState: () => {url: "", company: "", position: ""},
+  initialState: () => {url: "", company: "", position: "", postedDate: ""},
   render: self => {
     /** Event handlers which function as sort of dispatchers */
     let changeUrl = x => self.send(UpdateUrl(x));
     let changeCompany = x => self.send(UpdateCompany(x));
     let changePosition = x => self.send(UpdatePosition(x));
+    let changePostedDate = x => self.send(UpdatePostedDate(x));
     <div>
       <form>
         <ScrapingInput
@@ -61,7 +65,16 @@ let make = (~submitHandler, ~signOutHandler, _children) => {
         />
         <div className="form-horizontal-separator">
           <label> (ReasonReact.stringToElement("Date posted")) </label>
-          <input _type="date" name="dateposted" />
+          <ScrapingInput
+            script=ScrapingFunctions.scriptBody
+            typeValue="date"
+            validationFn=ScrapingFunctions.validateDate
+            processFn=ScrapingFunctions.extractPostedDateProcess
+            reducerFn=changePostedDate
+            name="postedDate"
+            placeholder=""
+            value=self.state.postedDate
+          />
         </div>
         <div className="form-horizontal-separator">
           <label> (ReasonReact.stringToElement("Deadline")) </label>
