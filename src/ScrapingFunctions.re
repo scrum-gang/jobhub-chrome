@@ -58,11 +58,11 @@ let daysAgoDate = (x: string) => {
 let extractPostedDateProcess = x: string => {
   let stringBody = x |> Js.String.make;
 
-  Js.String.match(postedDateRegex, stringBody)
-    |> result => switch (result) {
-      | None => ""
-      | Some(match) => daysAgoDate(match[1])
-    };
+  let result = Js.String.match(postedDateRegex, stringBody);
+  switch (result) {
+  | None => ""
+  | Some(match) => daysAgoDate(match[1])
+  };
 };
 
 let checkValidUrl = x => {
