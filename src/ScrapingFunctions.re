@@ -35,6 +35,7 @@ let validateNonNull = x =>
   | Some(x) => x
   };
 
+/** Note: toStringProcess(None) => "0" */
 let toStringProcess = x => Js.String.make(x);
 
 /** return the date x days ago in the format yyyy-MM-dd */
