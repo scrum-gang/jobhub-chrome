@@ -49,7 +49,7 @@ let formatDate = date => Js.Date.fromFloat(date)
   };
 
 /** return the date x days ago in the format yyyy-MM-dd */
-let daysAgoDate = (x: string) => {
+let daysAgoDate = x: string => {
   let now = Js.Date.make();
   let delta = (Js.Date.getDate(now) -. float_of_int(int_of_string(x)));
   Js.Float.isNaN(delta) ? "" : Js.Date.setDate(now, delta) |> formatDate;
@@ -65,16 +65,20 @@ let extractPostedDateProcess = x: string => {
   };
 };
 
-let checkValidUrl = x => {
+let checkValidUrl = x: string => {
   let stringUrl = x |> Js.String.make;
   Js.Re.test(stringUrl, urlRegex) ? x : failwith("Invalid URL");
 };
 
-let checkValidPostedDate = x => {
+let checkValidPostedDate = x: string => {
   let stringUrl = x |> Js.String.make;
   Js.Re.test(stringUrl, postedDateRegex) ? x : failwith("Unable to find posted date");
 };
 
-let validateUrl = x => x |> validateNonNull |> checkValidUrl;
+/** if the string contains a valide url it will return the input string
+    if the string doesn't contain a valid url it raises a failure */
+let validateUrl = x: string => x |> validateNonNull |> checkValidUrl;
 
-let validateDate = x => x |> validateNonNull |> checkValidPostedDate;
+/** if the string contains a valide date in the form "<num> days ago" it will return the input string
+    if the string doesn't contain a valid date it raises a failure */
+let validateDate = x: string => x |> validateNonNull |> checkValidPostedDate;
