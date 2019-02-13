@@ -1,13 +1,3 @@
-/** For checking if a URL is valid */
-let urlRegex = [%bs.re "/^((?:https?:\/\/)?[^./]+(?:\.[^./]+)+(?:\/.*)?)$/"];
-
-/** heuristic: the first match for "<num> day[s] ago" in top-bottom order
-    tends to be the posted date of the job application. Subsequent matches
-    are often posted dates for other offers being advertized.*/
-let postedDateRegex = [%bs.re "/(\d+)[\s]+day[s]?[\s]+ago/im"];
-
-let capitalLetterRegex = [%bs.re "/([A-Z][a-z]+)/"];
-
 let scriptUrl = "document.URL";
 
 /** TODO: Need to find some good logic for this,
@@ -58,7 +48,7 @@ let daysAgoDate = x: string => {
 
 let extractPostedDateProcess = x : string => {
   let stringBody = x |> Js.String.make;
-  let result = Js.String.match(postedDateRegex, stringBody);
+  let result = Js.String.match(Constants.postedDateRegex, stringBody);
   switch (result) {
   | None => ""
   | Some(match) => daysAgoDate(match[1])
@@ -66,21 +56,24 @@ let extractPostedDateProcess = x : string => {
 };
 
 /**
+Heuristic: check how many times the name of a company appears.
+The company name with highest frequency is the company we're looking for.
+
 - Potential improvements: cache the company name given the URL
 - Make a legit getSubstringOccurences method
 - Checker --> if I'm on linkedin, don't use me as #1 result
  */
 let extractCompaniesProcess = (companies: array(string), body) => {
   let stringBody = body |> Js.String.toLowerCase;
+  /** Particular check for Linkedin (could've converted into its own type) */
   let linkedinCheck =
-    Js.String.match(
-      Js.Re.fromString("https://static.licdn.com"),
-      stringBody,
-    )
+    Js.String.match(Js.Re.fromString(Constants.linkedinCDNURL), stringBody)
     != None;
+  /**Skip this company if the custom check for the company doesn't pass */
   let companyCheckers = company =>
     switch (company |> Js.String.toLocaleLowerCase) {
-    | "linkedin" when linkedinCheck => false
+    | x when x == Constants.linkedinCompanyNameLowerCase && linkedinCheck =>
+      false
     | _ => true
     };
   /**
@@ -111,12 +104,12 @@ let extractCompaniesProcess = (companies: array(string), body) => {
 
 let checkValidUrl = x => {
   let stringUrl = x |> Js.String.make;
-  Js.Re.test(stringUrl, urlRegex) ? x : failwith("Invalid URL");
+  Js.Re.test(stringUrl, Constants.urlRegex) ? x : failwith("Invalid URL");
 };
 
 let checkValidPostedDate = x: string => {
   let stringUrl = x |> Js.String.make;
-  Js.Re.test(stringUrl, postedDateRegex) ?
+  Js.Re.test(stringUrl, Constants.postedDateRegex) ?
     x : failwith("Unable to find posted date");
 };
 
