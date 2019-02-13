@@ -7,11 +7,32 @@ open ScrapingFunctions;
 describe("Validation Functions", () => {
   describe("validateNonNull", () => {
     /** TODO: add invalid cases */
-    let someValue = Js.Option.some("something");
+    let value = "something";
+    let someValue = Js.Option.some(value);
+
     test("with something", () => {
       validateNonNull(someValue)
       |> expect
-      |> toBe("something")
+      |> toBe(value)
+    });
+  });
+
+  describe("validateUrl", () => {
+    /** TODO: add invalid cases */
+    let httpsUrl = "https://github.com/scrum-gang/jobhub-chrome/pull/27";
+    let httpUrl = "http://github.com/scrum-gang/jobhub-chrome/pull/27";
+    let someHttpsURL = Js.Option.some(httpsUrl);
+    let someHttpURL = Js.Option.some(httpUrl);
+
+    test("https", () => {
+      validateUrl(someHttpsURL)
+      |> expect
+      |> toBe(httpsUrl)
+    });
+    test("http", () => {
+      validateUrl(someHttpURL)
+      |> expect
+      |> toBe(httpUrl)
     });
   });
 });
