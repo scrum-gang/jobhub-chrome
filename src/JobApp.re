@@ -56,7 +56,7 @@ let make = (~submitHandler, ~signOutHandler, _children) => {
           | [||] => ReasonReact.stringToElement("Loading")
           | _ =>
             <ScrapingInput
-              script=ScrapingFunctions.scriptCompany
+              script=ScrapingFunctions.scriptHtmlBody
               typeValue="text"
               validationFn=ScrapingFunctions.validateNonNull
               processFn=(
@@ -96,7 +96,7 @@ let make = (~submitHandler, ~signOutHandler, _children) => {
         <div className="form-horizontal-separator">
           <label> (ReasonReact.stringToElement("Date posted")) </label>
           <ScrapingInput
-            script=ScrapingFunctions.scriptBody
+            script=ScrapingFunctions.scriptHtmlBody
             typeValue="date"
             validationFn=ScrapingFunctions.validateDate
             processFn=ScrapingFunctions.extractPostedDateProcess

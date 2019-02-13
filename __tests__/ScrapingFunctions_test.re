@@ -1,6 +1,7 @@
 open Jest;
 open Expect;
 open ScrapingFunctions;
+open Services;
 
 /** TODO: figure out how to test toThrow (failwith) */
 
@@ -53,6 +54,30 @@ describe("Process Functions", () => {
       toStringProcess(None)
       |> expect
       |> toBe("0")
+    });
+  });
+
+  describe("extractCompaniesProcess", () => {
+    /** TODO: add invalid cases */
+    let companyString = "Excepteur Gartner sint Gap occaecat GEICO cupidatat
+    GEICO non proident, sunt Gatorade in culpa qui officia deserunt laborum.";
+    let linkedinString = "Excepteur https://static.licdn.com linkedin linkedin
+    linkedin linkedin Gartner sint Gap occaecat cupidatat General Communication
+    non proident, sunt General Communication Gatorade in culpa qui General Communication
+    officia deserunt mollit anim id est laborum.";
+    let companies = [|"Gap", "Garmin", "Gartner", "Gateway Computers", "linkedin",
+    "Gatorade", "GEICO", "Gemini Sound Products", "General Communication", "General Dynamics",
+    "General Electric", "GE Consumer & Industrial", "General Mills", "General Motors"|];
+
+    test("known company", () => {
+      extractCompaniesProcess(companies, companyString)
+      |> expect
+      |> toBe("GEICO")
+    });
+    test("linkedin check & spaced string", () => {
+      extractCompaniesProcess(companies, linkedinString)
+      |> expect
+      |> toBe("General Communication")
     });
   });
 });
