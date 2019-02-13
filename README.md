@@ -1,26 +1,22 @@
-# Chrome Reason React
-[![Build Status](https://travis-ci.org/scrum-gang/jobhub-chrome.svg?branch=master)](https://travis-ci.org/scrum-gang/jobhub-chrome)
+# JobHub Google Chrome Extension
+Keep track of job applications ad-hoc
 
+[![Build Status](https://travis-ci.org/scrum-gang/jobhub-chrome.svg?branch=master)](https://travis-ci.org/scrum-gang/jobhub-chrome) 
 [![Coverage Status](https://coveralls.io/repos/github/scrum-gang/jobhub-chrome/badge.svg)](https://coveralls.io/github/scrum-gang/jobhub-chrome)
 
-## How to setup
-1. Clone the repo
-    ```bash
-    git clone https://github.com/scrum-gang/jobhub-chrome.git
-    cd jobhub-chrome
+## How to setup the project & contribute
+Please check our [contributors guide](.github/CONTRIBUTING.md).
 
-2. Install the dependencies and start the Bucklescript watcher to compile `./src/*.re` into `./lib/js/*.js`
-    ```bash
-    npm install
-    npm start
-    ```
+## Why use the JobHub Extension
+TODO
 
-3. Start the Webpack watcher to bundle `./lib/js/*.js` into `./build/index.js`
-    ```bash
-    npm run webpack-dev
-    ```
+## Architecture
+TODO
 
-4. Start the Jest watcher to continously test your changes
-    ```bash
-    npm test
-    ```
+## Limitations
+* Currently, the only supported `posted date` scraper pattern is `"<num> days ago"`
+* Currently, the extension does not have a `deadline date` scraper
+* Because of the [bucklescript-chrome](https://github.com/jchavarri/bucklescript-chrome.git#start-extensions) bindings used to build the extension,  
+we are locked with outdated versions of core libraries such as `React` and `Bucklescript`
+* For the same reason as above, we can't use Chrome's [Content Scripts](https://developer.chrome.com/extensions/content_scripts).  
+    Instead we inject a script into the active website to extract DOM information.
