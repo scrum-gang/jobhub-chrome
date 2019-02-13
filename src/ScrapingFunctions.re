@@ -40,7 +40,7 @@ let formatDate = date => Js.Date.fromFloat(date)
 let daysAgoDate = x: string => {
   let now = Js.Date.make();
   let delta = Js.Date.getDate(now) -. float_of_int(int_of_string(x));
-  Js.Float.isNaN(delta) ? "" : Js.Date.setDate(now, delta) |> formatDate;
+  Js.Date.setDate(now, delta) |> formatDate;
 };
 
 let extractPostedDateProcess = x : string => {
