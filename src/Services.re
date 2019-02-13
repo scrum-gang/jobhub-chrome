@@ -8,10 +8,7 @@ let loadCompanyNames = callback =>
     Fetch.fetch("business-names.json")
     |> then_(Fetch.Response.json)
     |> then_(json => {
-         json
-         |> Decode.companiesArray
-         |> Array.map(Js.String.toLowerCase)
-         |> (el => callback(el));
+         json |> Decode.companiesArray |> (el => callback(el));
          resolve();
        })
     |> catch(_err => {

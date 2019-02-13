@@ -56,7 +56,7 @@ let make = (~submitHandler, ~signOutHandler, _children) => {
           | [||] => ReasonReact.stringToElement("Loading")
           | _ =>
             <ScrapingInput
-              script=ScrapingFunctions.scriptBody
+              script=ScrapingFunctions.scriptCompany
               typeValue="text"
               validationFn=ScrapingFunctions.validateNonNull
               processFn=(
