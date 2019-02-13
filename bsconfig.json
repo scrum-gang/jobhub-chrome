@@ -23,7 +23,9 @@
   "namespace": false,
   "bs-dependencies": [
     "bucklescript-chrome",
-    "reason-react"
+    "reason-react",
+    "bs-fetch",
+    "@glennsl/bs-json"
   ],
   "bs-dev-dependencies": [
     "@glennsl/bs-jest"

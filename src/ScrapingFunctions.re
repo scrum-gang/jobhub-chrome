@@ -1,16 +1,8 @@
-/** For checking if a URL is valid */
-let urlRegex = [%bs.re "/^((?:https?:\/\/)?[^./]+(?:\.[^./]+)+(?:\/.*)?)$/"];
-
-/** heuristic: the first match for "<num> day[s] ago" in top-bottom order
-    tends to be the posted date of the job application. Subsequent matches
-    are often posted dates for other offers being advertized.*/
-let postedDateRegex = [%bs.re "/(\d+)[\s]+day[s]?[\s]+ago/im"];
-
 let scriptUrl = "document.URL";
 
 /** TODO: Need to find some good logic for this,
 Right now it's here to demonstrate erro validation */
-let scriptCompany = "document.h1";
+let scriptCompany = "document.body.innerHTML";
 
 /** Idea: gather all headers, find which one is the largest -- this one usually indicates the role for which one is applying  */
 /** NOTE: MAKE SURE TO DEFINE FUNCTIONS AS VAR, SO THAT THE CODE CAN REDECLARE THE FUNCTIONS EVERY TIME THE PAGE IS RENDERED */
@@ -26,7 +18,6 @@ let scriptPosition = "  var getAreaAndText = el => ({ fontSize: parseFloat(windo
                         .sort((a, b) => b.fontSize - a.fontSize)[0].text";
 
 /** Error checking with comfy optional types */
-
 let scriptBody = "document.body.innerHTML";
 
 let validateNonNull = x =>
@@ -51,28 +42,75 @@ let formatDate = date => Js.Date.fromFloat(date)
 /** return the date x days ago in the format yyyy-MM-dd */
 let daysAgoDate = x: string => {
   let now = Js.Date.make();
-  let delta = (Js.Date.getDate(now) -. float_of_int(int_of_string(x)));
+  let delta = Js.Date.getDate(now) -. float_of_int(int_of_string(x));
   Js.Float.isNaN(delta) ? "" : Js.Date.setDate(now, delta) |> formatDate;
 };
 
-let extractPostedDateProcess = x: string => {
+let extractPostedDateProcess = x : string => {
   let stringBody = x |> Js.String.make;
-
-  let result = Js.String.match(postedDateRegex, stringBody);
+  let result = Js.String.match(Constants.postedDateRegex, stringBody);
   switch (result) {
   | None => ""
   | Some(match) => daysAgoDate(match[1])
   };
 };
 
-let checkValidUrl = x: string => {
+/**
+Heuristic: check how many times the name of a company appears.
+The company name with highest frequency is the company we're looking for.
+
+- Potential improvements: cache the company name given the URL
+- Make a legit getSubstringOccurences method
+- Checker --> if I'm on linkedin, don't use me as #1 result
+ */
+let extractCompaniesProcess = (companies: array(string), body) => {
+  let stringBody = body |> Js.String.toLowerCase;
+  /** Particular check for Linkedin (could've converted into its own type) */
+  let linkedinCheck =
+    Js.String.match(Js.Re.fromString(Constants.linkedinCDNURL), stringBody)
+    != None;
+  /**Skip this company if the custom check for the company doesn't pass */
+  let companyCheckers = company =>
+    switch (company |> Js.String.toLocaleLowerCase) {
+    | x when x == Constants.linkedinCompanyNameLowerCase && linkedinCheck =>
+      false
+    | _ => true
+    };
+  /**
+   Brute force method: check how many times a company name appears in a string
+   */
+  let reducer = (acc, x) => {
+    let result =
+      /** A bit sketch that it's done this way, but I'm not going to write a functional method to get substring occurences and I can't
+    find a built-in one; this works just as well nonetheless*/
+      Js.String.splitByRe(
+        Js.Re.fromString(String.lowercase(x)),
+        stringBody,
+      );
+    switch (result) {
+    | value when Array.length(value) != 1 && companyCheckers(x) => [
+        (x, Array.length(value)),
+        ...acc,
+      ]
+    | _ => acc
+    };
+  };
+  companies
+  |> Array.fold_left(reducer, [])
+  |> List.sort(((_, a), (_, b)) => b - a)
+  |> List.hd
+  |> (((a, _)) => a);
+};
+
+let checkValidUrl = x => {
   let stringUrl = x |> Js.String.make;
-  Js.Re.test(stringUrl, urlRegex) ? x : failwith("Invalid URL");
+  Js.Re.test(stringUrl, Constants.urlRegex) ? x : failwith("Invalid URL");
 };
 
 let checkValidPostedDate = x: string => {
   let stringUrl = x |> Js.String.make;
-  Js.Re.test(stringUrl, postedDateRegex) ? x : failwith("Unable to find posted date");
+  Js.Re.test(stringUrl, Constants.postedDateRegex) ?
+    x : failwith("Unable to find posted date");
 };
 
 /** if the string contains a valide url it will return the input string
