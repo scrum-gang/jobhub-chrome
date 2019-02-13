@@ -3,13 +3,19 @@
   comma. If this screws with your editor highlighting, please tell us by filing
   an issue! */
 {
-  "name": "re-google-drawing",
+  "name": "jobhub-chrome-extension",
   "reason": {
     "react-jsx": 2
   },
-  "sources": [{
-    "dir": "src"
-  }],
+  "sources": [
+    {
+      "dir": "src"
+    },
+    {
+      "dir": "__tests__",
+      "type": "dev"
+    }
+  ],
   "package-specs": [{
     "module": "commonjs"
   }],
@@ -18,6 +24,9 @@
   "bs-dependencies": [
     "bucklescript-chrome",
     "reason-react"
+  ],
+  "bs-dev-dependencies": [
+    "@glennsl/bs-jest"
   ],
   "refmt": 3
 }
