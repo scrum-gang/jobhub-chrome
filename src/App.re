@@ -1,17 +1,13 @@
-type route =
-  | Login
-  | JobApp;
-
-type state = {route};
+type state = {token: string};
 
 type action =
-  | Login
+  | Login(string)
   | Logout;
 
 let reducer = (action, _state) =>
   switch (action) {
-  | Login => ReasonReact.Update({route: JobApp})
-  | Logout => ReasonReact.Update({route: Login})
+  | Login(jwt) => ReasonReact.Update({token: jwt})
+  | Logout => ReasonReact.Update({token: ""})
   };
 
 let component = ReasonReact.reducerComponent("App");
@@ -19,18 +15,17 @@ let component = ReasonReact.reducerComponent("App");
 let make = _children => {
   ...component,
   reducer,
-  initialState: () => {route: Login},
+  initialState: () => {token: ""},
   render: self =>
     <div className="app">
       (
-        switch (self.state.route) {
-        | Login => <Login submitHandler=(_event => self.send(Login)) />
-        | JobApp =>
+        (self.state.token === "") ?
+          <Login updateToken=(token => self.send(Login(token))) />
+          :
           <JobApp
             submitHandler=(_event => self.send(Logout))
             signOutHandler=(_event => self.send(Logout))
           />
-        }
       )
     </div>,
 };
