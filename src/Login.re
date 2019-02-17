@@ -47,7 +47,7 @@ let make = (~updateToken, _children) => {
     <div>
       <form onSubmit=openSignupPage>
         <button className="btn submit-btn" tabIndex=1>
-          (ReasonReact.stringToElement("Sign Up"))
+          (ReasonReact.stringToElement("Register"))
         </button>
       </form>
       <span className="form-vertical-separator">
