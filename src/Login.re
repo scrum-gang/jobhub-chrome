@@ -34,7 +34,7 @@ let make = (~updateToken, _children) => {
           Services.authenticate(
             ~email=state.email,
             ~password=state.password,
-            ~success=updateToken,
+            ~callback=updateToken,
             ~failure=()=>self.send(DisplayError)
           )
           ();

@@ -16,7 +16,7 @@ module Decode = {
     };
 };
 
-let authenticate = (~email, ~password, ~success, ~failure, _self) => {
+let authenticate = (~email, ~password, ~callback, ~failure, _self) => {
   let authEndpoint = "https://jobhub-authentication-staging.herokuapp.com/login";
 
   let payload = Js.Dict.empty();
@@ -41,11 +41,12 @@ let authenticate = (~email, ~password, ~success, ~failure, _self) => {
     |> then_(json =>
       json
       |> Decode.authResponse
-      |> resp => success(resp.token)
+      |> resp => callback(Js.Option.some(resp.token))
       |> resolve
     )
     |> catch(err => {
       Js.log(err);
+      callback(None);
       failure();
       resolve();
     })
