@@ -68,7 +68,7 @@ let make = (~updateToken, _children) => {
           name="email"
           placeholder="email"
           value=self.state.email
-          onChange=(ev => UpdateEmail(Services.valueFromEvent(ev)) |> self.send)
+          onChange=(ev => UpdateEmail(Utilities.valueFromEvent(ev)) |> self.send)
           tabIndex=2
         />
         <input
@@ -76,7 +76,7 @@ let make = (~updateToken, _children) => {
           name="password"
           placeholder="password"
           value=self.state.password
-          onChange=(ev => UpdatePassword(Services.valueFromEvent(ev)) |> self.send)
+          onChange=(ev => UpdatePassword(Utilities.valueFromEvent(ev)) |> self.send)
           tabIndex=3
         />
         <button

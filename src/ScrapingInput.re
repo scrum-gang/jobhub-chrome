@@ -58,6 +58,6 @@ let make =
       value
       /*** Ideally, I would've passed a separate prop such as a "dispatcher" function,
            but honestly for the complexity of our app, I wouldn't bother  */
-      onChange=(evt => Services.valueFromEvent(evt) |> reducerFn)
+      onChange=(evt => Utilities.valueFromEvent(evt) |> reducerFn)
     />,
 };
