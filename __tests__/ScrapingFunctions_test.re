@@ -2,11 +2,8 @@ open Jest;
 open Expect;
 open ScrapingFunctions;
 
-/** TODO: figure out how to test toThrow (failwith) */
-
 describe("Validation Functions", () => {
   describe("validateNonNull", () => {
-    /** TODO: add invalid cases */
     let value = "something";
     let someValue = Js.Option.some(value);
 
@@ -15,10 +12,15 @@ describe("Validation Functions", () => {
       |> expect
       |> toBe(value)
     });
+    test("with nothing", () => {
+      try (validateNonNull(None)) {
+      | Failure("Value is null") => pass
+      | _ => fail("expected failure")
+      }
+    });
   });
 
   describe("validateUrl", () => {
-    /** TODO: add invalid cases */
     let httpsUrl = "https://github.com/scrum-gang/jobhub-chrome/pull/27";
     let httpUrl = "http://github.com/scrum-gang/jobhub-chrome/pull/27";
     let someHttpsURL = Js.Option.some(httpsUrl);
@@ -33,6 +35,20 @@ describe("Validation Functions", () => {
       validateUrl(someHttpURL)
       |> expect
       |> toBe(httpUrl)
+    });
+  });
+
+  describe("checkValidUrl", () => {
+    test("empty string", () => {
+      /** TODO: there has to be a more elegant way to test failures.... */
+      let expectedFailure = "Invalid URL";
+      let caughtFailure = try (checkValidUrl("")) {
+        | Failure(expectedFailure) => expectedFailure
+        | _ => ""
+      };
+
+      caughtFailure == expectedFailure ?
+        pass : fail("expected failure");
     });
   });
 });
@@ -53,6 +69,30 @@ describe("Process Functions", () => {
       toStringProcess(None)
       |> expect
       |> toBe("0")
+    });
+  });
+
+  describe("extractCompaniesProcess", () => {
+    /** TODO: add invalid cases */
+    let companyString = "Excepteur Gartner sint Gap occaecat GEICO cupidatat
+    GEICO non proident, sunt Gatorade in culpa qui officia deserunt laborum.";
+    let linkedinString = "Excepteur https://static.licdn.com linkedin linkedin
+    linkedin linkedin Gartner sint Gap occaecat cupidatat General Communication
+    non proident, sunt General Communication Gatorade in culpa qui General Communication
+    officia deserunt mollit anim id est laborum.";
+    let companies = [|"Gap", "Garmin", "Gartner", "Gateway Computers", "linkedin",
+    "Gatorade", "GEICO", "Gemini Sound Products", "General Communication", "General Dynamics",
+    "General Electric", "GE Consumer & Industrial", "General Mills", "General Motors"|];
+
+    test("known company", () => {
+      extractCompaniesProcess(companies, companyString)
+      |> expect
+      |> toBe("GEICO")
+    });
+    test("linkedin check & spaced string", () => {
+      extractCompaniesProcess(companies, linkedinString)
+      |> expect
+      |> toBe("General Communication")
     });
   });
 });
@@ -78,7 +118,6 @@ describe("Date Functions", () => {
   });
 
   describe("daysAgoDate", () => {
-    /** TODO: add invalid cases */
     let now = Js.Date.make();
     let today = now |> Js.Date.getTime;
     /** must pass a new Js.Date.t everytime because setDate changes the passed date */
@@ -136,5 +175,21 @@ describe("Date Functions", () => {
       |> expect
       |> toEqual(lengthString)
     });
+
+    test("no date", () => {
+      /** TODO: there has to be a more elegant way to test failures.... */
+      let expectedFailure = "Unable to find posted date";
+      let caughtFailure = {
+        let someInvalidDate = Js.Option.some("");
+        try (validateDate(someInvalidDate)) {
+        | Failure(expectedFailure) => expectedFailure
+        | _ => ""
+        };
+      };
+
+      caughtFailure == expectedFailure ?
+        pass : fail("expected failure");
+    });
+
   });
 });

@@ -1,8 +1,6 @@
 let scriptUrl = "document.URL";
 
-/** TODO: Need to find some good logic for this,
-Right now it's here to demonstrate erro validation */
-let scriptCompany = "document.body.innerHTML";
+let scriptHtmlBody = "document.body.innerHTML";
 
 /** Idea: gather all headers, find which one is the largest -- this one usually indicates the role for which one is applying  */
 /** NOTE: MAKE SURE TO DEFINE FUNCTIONS AS VAR, SO THAT THE CODE CAN REDECLARE THE FUNCTIONS EVERY TIME THE PAGE IS RENDERED */
@@ -18,7 +16,6 @@ let scriptPosition = "  var getAreaAndText = el => ({ fontSize: parseFloat(windo
                         .sort((a, b) => b.fontSize - a.fontSize)[0].text";
 
 /** Error checking with comfy optional types */
-let scriptBody = "document.body.innerHTML";
 
 let validateNonNull = x =>
   switch (x) {
@@ -43,7 +40,7 @@ let formatDate = date => Js.Date.fromFloat(date)
 let daysAgoDate = x: string => {
   let now = Js.Date.make();
   let delta = Js.Date.getDate(now) -. float_of_int(int_of_string(x));
-  Js.Float.isNaN(delta) ? "" : Js.Date.setDate(now, delta) |> formatDate;
+  Js.Date.setDate(now, delta) |> formatDate;
 };
 
 let extractPostedDateProcess = x : string => {
