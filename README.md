@@ -4,6 +4,11 @@ Keep track of job applications ad-hoc
 [![Build Status](https://travis-ci.org/scrum-gang/jobhub-chrome.svg?branch=master)](https://travis-ci.org/scrum-gang/jobhub-chrome) 
 [![Coverage Status](https://coveralls.io/repos/github/scrum-gang/jobhub-chrome/badge.svg)](https://coveralls.io/github/scrum-gang/jobhub-chrome)
 
+| Login Popup  | Job Posting Form |
+| ------------- | ------------- |
+| ![Login Popup](https://i.imgur.com/GXQQewr.png)  | ![Job Posting Form](https://i.imgur.com/rQyb5oD.png)  |
+
+
 ## How to setup the project & contribute
 Please check our [contributors guide](.github/CONTRIBUTING.md).
 
