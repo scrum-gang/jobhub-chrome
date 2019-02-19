@@ -74,16 +74,18 @@ let make = (~updateToken, _children) => {
           name="email"
           placeholder="email"
           value=self.state.email
-          onChange=(ev => UpdateEmail(valueFromEvent(ev)) |> self.send)
+          required=(true |> bool)
           tabIndex=2
+          onChange=(ev => UpdateEmail(valueFromEvent(ev)) |> self.send)
         />
         <input
           _type="password"
           name="password"
           placeholder="password"
           value=self.state.password
-          onChange=(ev => UpdatePassword(valueFromEvent(ev)) |> self.send)
+          required=(true |> bool)
           tabIndex=3
+          onChange=(ev => UpdatePassword(valueFromEvent(ev)) |> self.send)
         />
         <button className="btn submit-btn" tabIndex=4>
           ("Sign In" |> str)
