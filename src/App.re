@@ -21,13 +21,15 @@ let make = _children => {
       (
         switch (self.state.token) {
         | None =>
-          <Login updateToken=(
-            token =>
-              switch (token) {
-              | Some(token) => self.send(Login(token))
-              | None => self.send(Logout)
-              }
-            ) />
+          <Login
+            updateToken=(
+              token =>
+                switch (token) {
+                | Some(token) => self.send(Login(token))
+                | None => self.send(Logout)
+                }
+            )
+          />
         | Some(_token) =>
           <JobApp
             submitHandler=(_event => self.send(Logout))
