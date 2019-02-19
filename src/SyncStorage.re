@@ -4,7 +4,7 @@ let clear = () => Chrome.Extensions.Storage.Sync.clear(() => ());
 
 /** Store the token if it exists, clear the storage if not
  *  This ensures no expired tokens are kept in storage */
-let saveTokenOrClear = maybeToken =>
+let refreshToken = maybeToken =>
   switch (maybeToken) {
   | Some(jwt) =>
     let token = Js.Dict.empty();

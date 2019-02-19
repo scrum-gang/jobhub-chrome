@@ -15,7 +15,7 @@ let make = _children => {
     | Login(maybeJwt) =>
       ReasonReact.UpdateWithSideEffects(
         {token: maybeJwt},
-        (_self => SyncStorage.saveTokenOrClear(maybeJwt)),
+        (_self => SyncStorage.refreshToken(maybeJwt)),
       )
     | Logout =>
       ReasonReact.UpdateWithSideEffects(
