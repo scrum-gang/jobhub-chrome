@@ -44,3 +44,5 @@ The basic things every PR must have are the following:
     ```bash
     npm test
     ```
+5. If you haven't done so previously, [unpack the extension locally in your browser](https://developer.chrome.com/extensions/getstarted#manifest).  
+   Note that you only really need to run this step once.
