@@ -1,13 +1,5 @@
 open Chrome.Extensions;
 
-/** Convert value from event to string
-One of the disadvantages from reason is that you have to do this type casting */
-let valueFromEvent = evt => (
-                              evt
-                              |> ReactEventRe.Form.target
-                              |> ReactDOMRe.domElementToObj
-                            )##value;
-
 type scrapingReturn('a) =
   | None
   | Some('a);
@@ -66,6 +58,6 @@ let make =
       value
       /*** Ideally, I would've passed a separate prop such as a "dispatcher" function,
            but honestly for the complexity of our app, I wouldn't bother  */
-      onChange=(evt => valueFromEvent(evt) |> reducerFn)
+      onChange=(evt => Utilities.valueFromEvent(evt) |> reducerFn)
     />,
 };

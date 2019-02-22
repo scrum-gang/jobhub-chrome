@@ -11,6 +11,7 @@
 
 body {
   font-family:"Arial", "Helvetica", sans-serif;
+  font-size: var(--baseFontSize);
   margin:0;
   padding:0;
   -webkit-font-smoothing:antialiased;
@@ -161,4 +162,10 @@ select:active {
     linear-gradient(-135deg, transparent 50%, var(--positiveFg) 50%),
     linear-gradient(-225deg, transparent 50%, var(--positiveFg) 50%),
     linear-gradient(var(--positiveFg) 42%, var(--baseBg) 42%);
+}
+
+.error-message {
+  color: #e94b4b;
+  margin: 5px 0;
+  font-weight: 800;
 }
