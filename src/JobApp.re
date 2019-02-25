@@ -54,14 +54,12 @@ let make = (~submitHandler, ~signOutHandler, ~jwt, _children) => {
     let setResumes = x => self.send(UpdateResumes(x));
     ReasonReact.UpdateWithSideEffects(
       self.state,
-      _self => Services.loadCompanyNames(setCompanyNames),
-    );
-    ReasonReact.UpdateWithSideEffects(
-      self.state,
-      _self =>
+      _self => {
+        Services.loadCompanyNames(setCompanyNames);
         Services.getResumeRevisions(jwt, setResumes, _ =>
           failwith("Failed to load resumes")
-        ),
+        );
+      },
     );
   },
   render: self => {
