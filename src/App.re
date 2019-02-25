@@ -53,6 +53,7 @@ let make = _children => {
           <JobApp
             submitHandler=(_event => self.send(Logout))
             signOutHandler=(_event => self.send(Logout))
+            jwt=_token
           />
         }
       )

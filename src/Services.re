@@ -12,6 +12,15 @@ type selfResponse = {
   verified: bool,
 };
 
+type resume = {
+  id: int,
+  title: string,
+  revision: string,
+  username: string,
+  userId: string,
+  downloadUrl: string,
+};
+
 module Decode = {
   let companiesArray = json : array(string) =>
     Json.Decode.(json |> array(string));
@@ -25,10 +34,21 @@ module Decode = {
     Json.Decode.{
       id: json |> field("_id", string),
       email: json |> field("email", string),
-      password: json |> field("token", string),
+      password: json |> field("password", string),
       userType: json |> field("type", string),
       verified: json |> field("verified", bool),
     };
+  let resumeRevision = json : resume =>
+    Json.Decode.{
+      id: json |> field("id", int),
+      title: json |> field("title", string),
+      revision: json |> field("revision", string),
+      username: json |> field("user_name", string),
+      userId: json |> field("user_id", string),
+      downloadUrl: json |> field("download_resume_url", string),
+    };
+  let resumesArray = json : array(resume) =>
+    Json.Decode.(json |> array(resumeRevision));
 };
 
 let authenticate = (~email, ~password, ~callback, ~failure, _self) => {
@@ -53,6 +73,41 @@ let authenticate = (~email, ~password, ~callback, ~failure, _self) => {
     |> catch(err => {
          Js.log(err);
          callback(None);
+         failure();
+         resolve();
+       })
+  )
+  |> ignore;
+};
+
+let getResumeRevisions = (~jwt, ~callback, ~failure) => {
+  let headers =
+    Fetch.HeadersInit.make({
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " ++ jwt,
+    });
+  let getResumeRevisionPromise = (user: selfResponse) => {
+    let resumesEndpoint = Constants.resumesUrl ++ "/resumes/" ++ user.id;
+    Js.Promise.(
+      Fetch.fetchWithInit(
+        resumesEndpoint,
+        Fetch.RequestInit.make(~method_=Get, ~headers, ()),
+      )
+      |> then_(Fetch.Response.json)
+      |> then_(json => json |> Decode.resumesArray |> callback |> resolve)
+    );
+  };
+  let selfEndpoint = Constants.authUrl ++ "/users/self";
+  Js.Promise.(
+    Fetch.fetchWithInit(
+      selfEndpoint,
+      Fetch.RequestInit.make(~method_=Get, ~headers, ()),
+    )
+    |> then_(Fetch.Response.json)
+    |> then_(json => json |> Decode.selfResponse |> resolve)
+    |> then_(getResumeRevisionPromise)
+    |> catch(err => {
+         Js.log(err);
          failure();
          resolve();
        })

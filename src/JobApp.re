@@ -1,11 +1,15 @@
 open Utilities;
 
+type resume = Services.resume;
+
 type state = {
   url: string,
   company: string,
   position: string,
   postedDate: string,
   companies: array(string),
+  resumes: array(resume),
+  resumeValue: int,
 };
 
 type action =
@@ -13,7 +17,9 @@ type action =
   | UpdateCompany(string)
   | UpdatePosition(string)
   | UpdatePostedDate(string)
-  | UpdateCompanyNames(array(string));
+  | UpdateCompanyNames(array(string))
+  | UpdateResumes(array(resume))
+  | UpdateResumeValue(int);
 
 let reducer = (action, _state) =>
   switch (action) {
@@ -24,11 +30,14 @@ let reducer = (action, _state) =>
     ReasonReact.Update({..._state, postedDate: value})
   | UpdateCompanyNames(value) =>
     ReasonReact.Update({..._state, companies: value})
+  | UpdateResumes(value) => ReasonReact.Update({..._state, resumes: value})
+  | UpdateResumeValue(value) =>
+    ReasonReact.Update({..._state, resumeValue: value})
   };
 
 let component = ReasonReact.reducerComponent("JobApp");
 
-let make = (~submitHandler, ~signOutHandler, _children) => {
+let make = (~submitHandler, ~signOutHandler, ~jwt, _children) => {
   ...component, /* spread the template's other defaults into here  */
   reducer,
   initialState: () => {
@@ -37,12 +46,23 @@ let make = (~submitHandler, ~signOutHandler, _children) => {
     position: "",
     postedDate: "",
     companies: [||],
+    resumes: [||],
+    resumeValue: (-1),
   },
   didMount: self => {
     let setCompanyNames = x => self.send(UpdateCompanyNames(x));
+    let setResumes = x => self.send(UpdateResumes(x));
+    Js.log(jwt);
     ReasonReact.UpdateWithSideEffects(
       self.state,
       _self => Services.loadCompanyNames(setCompanyNames),
+    );
+    ReasonReact.UpdateWithSideEffects(
+      self.state,
+      _self =>
+        Services.getResumeRevisions(jwt, setResumes, _ =>
+          Js.log("Failed to load resumes")
+        ),
     );
   },
   render: self => {
@@ -51,6 +71,7 @@ let make = (~submitHandler, ~signOutHandler, _children) => {
     let changeCompany = x => self.send(UpdateCompany(x));
     let changePosition = x => self.send(UpdatePosition(x));
     let changePostedDate = x => self.send(UpdatePostedDate(x));
+    let changeResumeValue = x => self.send(UpdateResumeValue(x));
     <div>
       <form>
         (
@@ -122,10 +143,24 @@ let make = (~submitHandler, ~signOutHandler, _children) => {
             ("To apply" |> str)
           </label>
         </div>
-        <select>
-          <option value="0"> ("Used CV" |> str) </option>
-          <option value="1"> ("TODO" |> str) </option>
-          <option value="2"> ("TODO" |> str) </option>
+        <select
+          value=(string_of_int(self.state.resumeValue))
+          onChange=(
+            evt =>
+              Utilities.valueFromEvent(evt)
+              |> int_of_float
+              |> changeResumeValue
+          )>
+          (
+            ReasonReact.arrayToElement(
+              self.state.resumes
+              |> Array.map((el: resume) =>
+                   <option value=(string_of_int(el.id))>
+                     (el.title ++ " " ++ el.revision |> str)
+                   </option>
+                 ),
+            )
+          )
         </select>
         <button className="btn submit-btn" onClick=submitHandler>
           ("Submit" |> str)
