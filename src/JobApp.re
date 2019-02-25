@@ -1,9 +1,15 @@
+open Utilities;
+
+type resume = Services.resume;
+
 type state = {
   url: string,
   company: string,
   position: string,
   postedDate: string,
   companies: array(string),
+  resumes: array(resume),
+  resumeValue: int,
 };
 
 type action =
@@ -11,7 +17,9 @@ type action =
   | UpdateCompany(string)
   | UpdatePosition(string)
   | UpdatePostedDate(string)
-  | UpdateCompanyNames(array(string));
+  | UpdateCompanyNames(array(string))
+  | UpdateResumes(array(resume))
+  | UpdateResumeValue(int);
 
 let reducer = (action, _state) =>
   switch (action) {
@@ -22,11 +30,14 @@ let reducer = (action, _state) =>
     ReasonReact.Update({..._state, postedDate: value})
   | UpdateCompanyNames(value) =>
     ReasonReact.Update({..._state, companies: value})
+  | UpdateResumes(value) => ReasonReact.Update({..._state, resumes: value})
+  | UpdateResumeValue(value) =>
+    ReasonReact.Update({..._state, resumeValue: value})
   };
 
 let component = ReasonReact.reducerComponent("JobApp");
 
-let make = (~submitHandler, ~signOutHandler, _children) => {
+let make = (~submitHandler, ~signOutHandler, ~jwt, _children) => {
   ...component, /* spread the template's other defaults into here  */
   reducer,
   initialState: () => {
@@ -35,12 +46,22 @@ let make = (~submitHandler, ~signOutHandler, _children) => {
     position: "",
     postedDate: "",
     companies: [||],
+    resumes: [||],
+    resumeValue: (-1),
   },
   didMount: self => {
     let setCompanyNames = x => self.send(UpdateCompanyNames(x));
+    let setResumes = x => self.send(UpdateResumes(x));
     ReasonReact.UpdateWithSideEffects(
       self.state,
       _self => Services.loadCompanyNames(setCompanyNames),
+    );
+    ReasonReact.UpdateWithSideEffects(
+      self.state,
+      _self =>
+        Services.getResumeRevisions(jwt, setResumes, _ =>
+          failwith("Failed to load resumes")
+        ),
     );
   },
   render: self => {
@@ -49,11 +70,12 @@ let make = (~submitHandler, ~signOutHandler, _children) => {
     let changeCompany = x => self.send(UpdateCompany(x));
     let changePosition = x => self.send(UpdatePosition(x));
     let changePostedDate = x => self.send(UpdatePostedDate(x));
+    let changeResumeValue = x => self.send(UpdateResumeValue(x));
     <div>
       <form>
         (
           switch (self.state.companies) {
-          | [||] => ReasonReact.stringToElement("Loading")
+          | [||] => "Loading" |> str
           | _ =>
             <ScrapingInput
               script=ScrapingFunctions.scriptHtmlBody
@@ -94,7 +116,7 @@ let make = (~submitHandler, ~signOutHandler, _children) => {
           value=self.state.url
         />
         <div className="form-horizontal-separator">
-          <label> (ReasonReact.stringToElement("Date posted")) </label>
+          <label> ("Date posted" |> str) </label>
           <ScrapingInput
             script=ScrapingFunctions.scriptHtmlBody
             typeValue="date"
@@ -107,36 +129,46 @@ let make = (~submitHandler, ~signOutHandler, _children) => {
           />
         </div>
         <div className="form-horizontal-separator">
-          <label> (ReasonReact.stringToElement("Deadline")) </label>
+          <label> ("Deadline" |> str) </label>
           <input _type="date" name="deadline" />
         </div>
         <div className="form-horizontal-separator">
           <label>
             <input _type="radio" name="status" value="applied" />
-            (ReasonReact.stringToElement("Applied"))
+            ("Applied" |> str)
           </label>
           <label>
             <input _type="radio" name="status" value="toApply" />
-            (ReasonReact.stringToElement("To apply"))
+            ("To apply" |> str)
           </label>
         </div>
-        <select>
-          <option value="0">
-            (ReasonReact.stringToElement("Used CV"))
-          </option>
-          <option value="1"> (ReasonReact.stringToElement("TODO")) </option>
-          <option value="2"> (ReasonReact.stringToElement("TODO")) </option>
+        <select
+          value=(string_of_int(self.state.resumeValue))
+          onChange=(
+            evt =>
+              Utilities.valueFromEvent(evt)
+              |> int_of_float
+              |> changeResumeValue
+          )>
+          (
+            ReasonReact.arrayToElement(
+              self.state.resumes
+              |> Array.map((el: resume) =>
+                   <option value=(string_of_int(el.id))>
+                     (el.title ++ " " ++ el.revision |> str)
+                   </option>
+                 ),
+            )
+          )
         </select>
         <button className="btn submit-btn" onClick=submitHandler>
-          (ReasonReact.stringToElement("Submit"))
+          ("Submit" |> str)
         </button>
         <span className="form-vertical-separator">
-          <p className="form-vertical-separator-txt">
-            (ReasonReact.stringToElement("or"))
-          </p>
+          <p className="form-vertical-separator-txt"> ("or" |> str) </p>
         </span>
         <button className="btn signout-btn" onClick=signOutHandler>
-          (ReasonReact.stringToElement("Sign Out"))
+          ("Sign Out" |> str)
         </button>
       </form>
     </div>;

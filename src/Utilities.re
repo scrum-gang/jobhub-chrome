@@ -5,3 +5,7 @@ let valueFromEvent = evt => (
                               |> ReactEventRe.Form.target
                               |> ReactDOMRe.domElementToObj
                             )##value;
+
+let str = ReasonReact.stringToElement;
+
+let bool = x => Js.Boolean.to_js_boolean(x);
