@@ -12,3 +12,4 @@ let linkedinCompanyNameLowerCase = "linkedin";
 
 let authUrl = "https://jobhub-authentication-staging.herokuapp.com";
 
+let resumesUrl = "https://resume-revision.herokuapp.com";

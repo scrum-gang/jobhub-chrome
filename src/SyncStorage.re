@@ -1,6 +1,6 @@
 open Chrome.Extensions.Storage;
 
-let clear = () => Chrome.Extensions.Storage.Sync.clear(() => ());
+let clear = () => Sync.clear(() => ());
 
 /** Store the token if it exists, clear the storage if not
  *  This ensures no expired tokens are kept in storage */
@@ -9,7 +9,7 @@ let refreshToken = maybeToken =>
   | Some(jwt) =>
     let token = Js.Dict.empty();
     Js.Dict.set(token, "token", Js.Json.string(jwt));
-    Chrome.Extensions.Storage.Sync.set(token, () => ());
+    Sync.set(token, () => ());
   | None => clear()
   };
 
@@ -23,7 +23,7 @@ let getSavedToken = () => {
     | _ => failwith("Expected token to be a string")
     };
   Js.Promise.make((~resolve, ~reject as _) =>
-    Chrome.Extensions.Storage.Sync.get("token", items => {
+    Sync.get("token", items => {
       let restoredToken =
         /** See https://developer.chrome.com/apps/storage#type-StorageArea
          *  We check chrome.runtime.lastError to ensure correctness even when API call fails */
