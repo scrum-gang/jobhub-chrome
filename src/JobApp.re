@@ -52,7 +52,6 @@ let make = (~submitHandler, ~signOutHandler, ~jwt, _children) => {
   didMount: self => {
     let setCompanyNames = x => self.send(UpdateCompanyNames(x));
     let setResumes = x => self.send(UpdateResumes(x));
-    Js.log(jwt);
     ReasonReact.UpdateWithSideEffects(
       self.state,
       _self => Services.loadCompanyNames(setCompanyNames),
@@ -61,7 +60,7 @@ let make = (~submitHandler, ~signOutHandler, ~jwt, _children) => {
       self.state,
       _self =>
         Services.getResumeRevisions(jwt, setResumes, _ =>
-          Js.log("Failed to load resumes")
+          failwith("Failed to load resumes")
         ),
     );
   },

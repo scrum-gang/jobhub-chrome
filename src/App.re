@@ -49,11 +49,11 @@ let make = _children => {
         switch (self.state.token) {
         | None =>
           <Login updateToken=(maybeToken => Login(maybeToken) |> self.send) />
-        | Some(_token) =>
+        | Some(token) =>
           <JobApp
             submitHandler=(_event => self.send(Logout))
             signOutHandler=(_event => self.send(Logout))
-            jwt=_token
+            jwt=token
           />
         }
       )
