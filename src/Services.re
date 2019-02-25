@@ -61,20 +61,16 @@ let authenticate = (~email, ~password, ~callback, ~failure, _self) => {
 };
 
 let validateToken = (~jwt, ~callback, ~failure) => {
-  let selfEndpoint = Constants.authUrl ++ "/self";
+  let selfEndpoint = Constants.authUrl ++ "/users/self";
   let headers =
     Fetch.HeadersInit.make({
       "Content-Type": "application/json",
       "Authorization": "Bearer " ++ jwt,
     });
-  let body =
-    Js.Json.object_(Js.Dict.empty())
-    |> Js.Json.stringify
-    |> Fetch.BodyInit.make;
   Js.Promise.(
     Fetch.fetchWithInit(
       selfEndpoint,
-      Fetch.RequestInit.make(~method_=Get, ~body, ~headers, ()),
+      Fetch.RequestInit.make(~method_=Get, ~headers, ()),
     )
     |> then_(response => {
          let status = response |> Fetch.Response.status;

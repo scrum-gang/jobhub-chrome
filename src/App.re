@@ -29,7 +29,13 @@ let make = _children => {
     Js.Promise.(
       SyncStorage.getSavedToken()
       |> then_(maybeJwt => {
-           handleRetrievedToken(maybeJwt);
+           switch (maybeJwt) {
+           | Some(value) =>
+             Services.validateToken(value, handleRetrievedToken, x =>
+               x |> Js.log
+             )
+           | None => handleRetrievedToken(maybeJwt)
+           };
            resolve();
          })
     )
@@ -37,6 +43,7 @@ let make = _children => {
     ReasonReact.NoUpdate;
   },
   render: self =>
+    /** TODO: Add a third loading state, a spinning wheel, while the token is being validated */
     <div className="app">
       (
         switch (self.state.token) {
