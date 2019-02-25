@@ -1,6 +1,6 @@
 open Chrome.Extensions.Storage;
 
-let clear = () => Chrome.Extensions.Storage.Sync.clear(() => ());
+let clear = () => Sync.clear(() => ());
 
 /** Store the token if it exists, clear the storage if not
  *  This ensures no expired tokens are kept in storage */

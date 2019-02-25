@@ -4,6 +4,14 @@ type authResponse = {
   token: string,
 };
 
+type selfResponse = {
+  id: string,
+  email: string,
+  password: string,
+  userType: string,
+  verified: bool,
+};
+
 module Decode = {
   let companiesArray = json : array(string) =>
     Json.Decode.(json |> array(string));
@@ -13,10 +21,18 @@ module Decode = {
       exp: json |> field("exp", int),
       token: json |> field("token", string),
     };
+  let selfResponse = json : selfResponse =>
+    Json.Decode.{
+      id: json |> field("_id", string),
+      email: json |> field("email", string),
+      password: json |> field("token", string),
+      userType: json |> field("type", string),
+      verified: json |> field("verified", bool),
+    };
 };
 
 let authenticate = (~email, ~password, ~callback, ~failure, _self) => {
-  let authEndpoint = "https://jobhub-authentication-staging.herokuapp.com/login";
+  let authEndpoint = Constants.authUrl ++ "/login";
   let payload = Js.Dict.empty();
   Js.Dict.set(payload, "email", Js.Json.string(email));
   Js.Dict.set(payload, "password", Js.Json.string(password));
@@ -39,6 +55,43 @@ let authenticate = (~email, ~password, ~callback, ~failure, _self) => {
          callback(None);
          failure();
          resolve();
+       })
+  )
+  |> ignore;
+};
+
+let validateToken = (~jwt, ~callback, ~failure) => {
+  let selfEndpoint = Constants.authUrl ++ "/self";
+  let headers =
+    Fetch.HeadersInit.make({
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " ++ jwt,
+    });
+  let body =
+    Js.Json.object_(Js.Dict.empty())
+    |> Js.Json.stringify
+    |> Fetch.BodyInit.make;
+  Js.Promise.(
+    Fetch.fetchWithInit(
+      selfEndpoint,
+      Fetch.RequestInit.make(~method_=Get, ~body, ~headers, ()),
+    )
+    |> then_(response => {
+         let status = response |> Fetch.Response.status;
+         switch (status) {
+         | 200 =>
+           callback(Js.Option.some(jwt));
+           resolve(true);
+         | _ =>
+           failure(jwt);
+           resolve(false);
+         };
+       })
+    |> catch(err => {
+         Js.log(err);
+         callback(None);
+         failure(jwt);
+         resolve(false);
        })
   )
   |> ignore;

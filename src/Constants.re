@@ -9,3 +9,6 @@ let postedDateRegex = [%bs.re "/(\d+)[\s]+day[s]?[\s]+ago/im"];
 let linkedinCDNURL = "https://static.licdn.com";
 
 let linkedinCompanyNameLowerCase = "linkedin";
+
+let authUrl = "https://jobhub-authentication-staging.herokuapp.com";
+
