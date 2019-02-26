@@ -1,5 +1,5 @@
 # JobHub Google Chrome Extension
-Keep track of job applications ad-hoc
+:pushpin: Keep track of job applications ad-hoc
 
 [![Build Status](https://travis-ci.org/scrum-gang/jobhub-chrome.svg?branch=master)](https://travis-ci.org/scrum-gang/jobhub-chrome) 
 [![Coverage Status](https://coveralls.io/repos/github/scrum-gang/jobhub-chrome/badge.svg)](https://coveralls.io/github/scrum-gang/jobhub-chrome)
@@ -32,6 +32,29 @@ The Chrome extension is meant to be an ad-hoc access to the JobHub services. Whe
 ├── popup.html          # html of the extension
 └── webpack.config.js   # Webpack config
 ```
+
+## Architecture
+```bash
+           popup.html
+               |
+             App.re
+             {token}
+               |
+   +-----------+-----------+
+   |                       |
+Login.re               JobApp.re
+                           |
+                   ScrapingInputs.re
+```
+
+`token` is the state variable which is initially obtained by `Login` during the authentication process and in subsequent  execustions of the extension its validity is confirmed by `App` directly. The variable is passed onto the `JobApp` component to be able to submit job applications.
+
+The system leverages the following modules
+- `ScrapingFunctions.re`: functions related to extracting/processing HTML elements
+- `Services.re`: functions related to asynchronous actions external to the extension (load files/API calls)
+- `SyncStorage.re`: functions related to the Chrome storage management
+- `Uilities.re`: general purpose helper functions
+
 
 ## Limitations
 * Currently, the only supported `posted date` scraper pattern is `"<num> days ago"`
