@@ -9,14 +9,11 @@ Keep track of job applications ad-hoc
 | ![Login Popup](https://i.imgur.com/GXQQewr.png)  | ![Job Posting Form](https://i.imgur.com/rQyb5oD.png)  |
 
 
-## How to setup the project & contribute
+## How to setup the project
 Please check our [contributors guide](.github/CONTRIBUTING.md).
 
 ## Why use the JobHub Extension
-TODO
-
-## Architecture
-TODO
+The Chrome extension is meant to be an ad-hoc access to the JobHub services. When the users are on a job application website, they don't need to stop browsing the post in order to open the JobHub website on a separate tab. Instead, they can start tracking the given application via the popup submit directly on the job posting website.
 
 ## Folder Structure
 ```bash
