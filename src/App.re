@@ -1,4 +1,7 @@
-type state = {token: option(string)};
+type state = {
+  validatedToken: bool,
+  token: option(string),
+};
 
 type action =
   | DidMount(option(string))
@@ -11,19 +14,20 @@ let make = _children => {
   ...component,
   reducer: (action, _state) =>
     switch (action) {
-    | DidMount(maybeJwt) => ReasonReact.Update({token: maybeJwt})
+    | DidMount(maybeJwt) =>
+      ReasonReact.Update({validatedToken: true, token: maybeJwt})
     | Login(maybeJwt) =>
       ReasonReact.UpdateWithSideEffects(
-        {token: maybeJwt},
+        {..._state, token: maybeJwt},
         (_self => SyncStorage.refreshToken(maybeJwt)),
       )
     | Logout =>
       ReasonReact.UpdateWithSideEffects(
-        {token: None},
+        {..._state, token: None},
         (_self => SyncStorage.clear()),
       )
     },
-  initialState: () => {token: None},
+  initialState: () => {validatedToken: false, token: None},
   didMount: self => {
     let handleRetrievedToken = maybeJwt => DidMount(maybeJwt) |> self.send;
     Js.Promise.(
@@ -44,19 +48,22 @@ let make = _children => {
     ReasonReact.NoUpdate;
   },
   render: self =>
-    /** TODO: Add a third loading state, a spinning wheel, while the token is being validated */
     <div className="app">
       (
-        switch (self.state.token) {
-        | None =>
-          <Login updateToken=(maybeToken => Login(maybeToken) |> self.send) />
-        | Some(token) =>
-          <JobApp
-            submitHandler=(_event => self.send(Logout))
-            signOutHandler=(_event => self.send(Logout))
-            jwt=token
-          />
-        }
+        self.state.validatedToken ?
+          switch (self.state.token) {
+          | None =>
+            <Login
+              updateToken=(maybeToken => Login(maybeToken) |> self.send)
+            />
+          | Some(token) =>
+            <JobApp
+              submitHandler=(_event => self.send(Logout))
+              signOutHandler=(_event => self.send(Logout))
+              jwt=token
+            />
+          } :
+          <div />
       )
     </div>,
 };
