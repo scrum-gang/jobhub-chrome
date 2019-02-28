@@ -12,14 +12,8 @@ type action =
   | DisplayError
   | Login;
 
-/** TODO: a binding is better because it offers type-safety */
-let openSignupPage = [%raw
-  {|
-  function(url) {
-    chrome.tabs.create({ url: "https://quizzical-mccarthy-0289ae.netlify.com/register" });
-  }
-|}
-];
+let openRegisterPage = _evt =>
+  tabURL(~url=Constants.registerUrl) |> createTab;
 
 let component = ReasonReact.reducerComponent("Login");
 
@@ -54,7 +48,7 @@ let make = (~updateToken, _children) => {
   render: self => {
     let errorMessage = self.state.error ? "Invalid credentials" : "";
     <div>
-      <form onSubmit=openSignupPage>
+      <form onSubmit=openRegisterPage>
         <button className="btn submit-btn" tabIndex=1>
           ("Register" |> str)
         </button>
