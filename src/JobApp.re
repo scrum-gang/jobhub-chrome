@@ -56,7 +56,7 @@ let make = (~submitHandler, ~signOutHandler, ~jwt, _children) => {
       self.state,
       _self => {
         Services.loadCompanyNames(setCompanyNames);
-        Services.getResumeRevisions(jwt, setResumes, _ =>
+        Services.getResumeRevisions(~jwt, ~callback=setResumes, ~failure=_ =>
           failwith("Failed to load resumes")
         );
       },

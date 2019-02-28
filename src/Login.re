@@ -16,7 +16,7 @@ type action =
 let openSignupPage = [%raw
   {|
   function(url) {
-    chrome.tabs.create({ url: "http://stackoverflow.com/" });
+    chrome.tabs.create({ url: "https://quizzical-mccarthy-0289ae.netlify.com/register" });
   }
 |}
 ];

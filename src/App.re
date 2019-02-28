@@ -30,8 +30,9 @@ let make = _children => {
       SyncStorage.getSavedToken()
       |> then_(maybeJwt => {
            switch (maybeJwt) {
-           | Some(value) =>
-             Services.validateToken(value, handleRetrievedToken, x =>
+           | Some(jwt) =>
+             Services.validateToken(
+               ~jwt, ~callback=handleRetrievedToken, ~failure=x =>
                x |> Js.log
              )
            | None => handleRetrievedToken(maybeJwt)
