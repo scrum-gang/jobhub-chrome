@@ -17,7 +17,7 @@ let openRegisterPage = _evt =>
 
 let component = ReasonReact.reducerComponent("Login");
 
-let make = (~updateToken, _children) => {
+let make = (~updateAuth, _children) => {
   ...component,
   reducer: (action, state) =>
     switch (action) {
@@ -35,7 +35,7 @@ let make = (~updateToken, _children) => {
               Services.authenticate(
                 ~email=state.email,
                 ~password=state.password,
-                ~callback=updateToken,
+                ~callback=updateAuth,
                 ~failure=() => self.send(DisplayError),
                 (),
               );

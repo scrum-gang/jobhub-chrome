@@ -10,6 +10,9 @@ type state = {
   companies: array(string),
   resumes: array(resume),
   resumeValue: int,
+  id: string,
+  jwt: string,
+  error: bool,
 };
 
 type action =
@@ -19,25 +22,56 @@ type action =
   | UpdatePostedDate(string)
   | UpdateCompanyNames(array(string))
   | UpdateResumes(array(resume))
-  | UpdateResumeValue(int);
+  | UpdateResumeValue(int)
+  | Submit
+  | SuccesfulSubmit
+  | FailedSubmit;
 
-let reducer = (action, _state) =>
+let reducer = (action, state) =>
   switch (action) {
-  | UpdateUrl(value) => ReasonReact.Update({..._state, url: value})
-  | UpdateCompany(value) => ReasonReact.Update({..._state, company: value})
-  | UpdatePosition(value) => ReasonReact.Update({..._state, position: value})
+  | UpdateUrl(value) =>
+    ReasonReact.Update({...state, url: value, error: false})
+  | UpdateCompany(value) =>
+    ReasonReact.Update({...state, company: value, error: false})
+  | UpdatePosition(value) =>
+    ReasonReact.Update({...state, position: value, error: false})
   | UpdatePostedDate(value) =>
-    ReasonReact.Update({..._state, postedDate: value})
+    ReasonReact.Update({...state, postedDate: value, error: false})
   | UpdateCompanyNames(value) =>
-    ReasonReact.Update({..._state, companies: value})
-  | UpdateResumes(value) => ReasonReact.Update({..._state, resumes: value})
+    ReasonReact.Update({...state, companies: value})
+  | UpdateResumes(value) => ReasonReact.Update({...state, resumes: value})
   | UpdateResumeValue(value) =>
-    ReasonReact.Update({..._state, resumeValue: value})
+    ReasonReact.Update({...state, resumeValue: value, error: false})
+  | Submit =>
+    ReasonReact.UpdateWithSideEffects(
+      {...state, error: false},
+      (
+        self =>
+          Services.submitApplication(
+            ~company=state.company,
+            ~position=state.position,
+            ~url=state.url,
+            ~id=state.id,
+            ~jwt=state.jwt,
+            ~callback=() => self.send(SuccesfulSubmit),
+            ~failure=() => self.send(FailedSubmit),
+          )
+      ),
+    )
+  | SuccesfulSubmit =>
+    ReasonReact.Update({
+      ...state,
+      url: "",
+      company: "",
+      position: "",
+      error: false,
+    })
+  | FailedSubmit => ReasonReact.Update({...state, error: true})
   };
 
 let component = ReasonReact.reducerComponent("JobApp");
 
-let make = (~submitHandler, ~signOutHandler, ~jwt, _children) => {
+let make = (~signOutHandler, ~id, ~jwt, _children) => {
   ...component, /* spread the template's other defaults into here  */
   reducer,
   initialState: () => {
@@ -48,6 +82,9 @@ let make = (~submitHandler, ~signOutHandler, ~jwt, _children) => {
     companies: [||],
     resumes: [||],
     resumeValue: (-1),
+    id,
+    jwt,
+    error: false,
   },
   didMount: self => {
     let setCompanyNames = x => self.send(UpdateCompanyNames(x));
@@ -55,9 +92,11 @@ let make = (~submitHandler, ~signOutHandler, ~jwt, _children) => {
     ReasonReact.UpdateWithSideEffects(
       self.state,
       _self => {
+        /** Fetch all data required for the form */
         Services.loadCompanyNames(setCompanyNames);
-        Services.getResumeRevisions(~jwt, ~callback=setResumes, ~failure=_ =>
-          failwith("Failed to load resumes")
+        Services.getResumeRevisions(
+          ~id, ~jwt, ~callback=setResumes, ~failure=_ =>
+          Js.log("Failed to load resumes")
         );
       },
     );
@@ -69,8 +108,16 @@ let make = (~submitHandler, ~signOutHandler, ~jwt, _children) => {
     let changePosition = x => self.send(UpdatePosition(x));
     let changePostedDate = x => self.send(UpdatePostedDate(x));
     let changeResumeValue = x => self.send(UpdateResumeValue(x));
+    let errorMessage = self.state.error ? "Failed to add application" : "";
     <div>
-      <form>
+      <form
+        onSubmit=(
+          ev => {
+            ReactEventRe.Form.preventDefault(ev);
+            self.send(Submit);
+          }
+        )>
+        <p className="error-message"> (errorMessage |> str) </p>
         (
           switch (self.state.companies) {
           | [||] => "Loading" |> str
@@ -159,9 +206,7 @@ let make = (~submitHandler, ~signOutHandler, ~jwt, _children) => {
             )
           )
         </select>
-        <button className="btn submit-btn" onClick=submitHandler>
-          ("Submit" |> str)
-        </button>
+        <button className="btn submit-btn"> ("Submit" |> str) </button>
         <span className="form-vertical-separator">
           <p className="form-vertical-separator-txt"> ("or" |> str) </p>
         </span>

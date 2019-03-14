@@ -12,6 +12,8 @@ let linkedinCompanyNameLowerCase = "linkedin";
 
 let authUrl = "https://jobhub-authentication.herokuapp.com";
 
+let jobAppUrl = "https://scrum-gang-job-applications.herokuapp.com";
+
 let resumesUrl = "https://resume-revision.herokuapp.com";
 
 let registerUrl = "https://quizzical-mccarthy-0289ae.netlify.com/register";

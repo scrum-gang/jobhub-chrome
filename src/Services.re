@@ -1,7 +1,10 @@
+type userId = {id: string};
+
 type authResponse = {
   iat: int,
   exp: int,
   token: string,
+  id: userId,
 };
 
 type selfResponse = {
@@ -24,11 +27,14 @@ type resume = {
 module Decode = {
   let companiesArray = json : array(string) =>
     Json.Decode.(json |> array(string));
+  let userId = json : userId =>
+    Json.Decode.{id: json |> field("_id", string)};
   let authResponse = json : authResponse =>
     Json.Decode.{
       iat: json |> field("iat", int),
       exp: json |> field("exp", int),
       token: json |> field("token", string),
+      id: json |> field("user", userId),
     };
   let selfResponse = json : selfResponse =>
     Json.Decode.{
@@ -68,11 +74,18 @@ let authenticate = (~email, ~password, ~callback, ~failure, _self) => {
     |> then_(json =>
          json
          |> Decode.authResponse
-         |> (resp => callback(Js.Option.some(resp.token)) |> resolve)
+         |> (
+           resp =>
+             callback(
+               Js.Option.some(resp.id.id),
+               Js.Option.some(resp.token),
+             )
+             |> resolve
+         )
        )
     |> catch(err => {
          Js.log(err);
-         callback(None);
+         callback(None, None);
          failure();
          resolve();
        })
@@ -80,32 +93,36 @@ let authenticate = (~email, ~password, ~callback, ~failure, _self) => {
   |> ignore;
 };
 
-let getResumeRevisions = (~jwt, ~callback, ~failure) => {
+let submitApplication =
+    (~company, ~position, ~url, ~id, ~jwt, ~callback, ~failure) => {
+  let jobAppEndpoint = Constants.jobAppUrl ++ "/apply/external";
+  let payload = Js.Dict.empty();
+  Js.Dict.set(payload, "company", Js.Json.string(company));
+  Js.Dict.set(payload, "position", Js.Json.string(position));
+  Js.Dict.set(payload, "url", Js.Json.string(url));
   let headers =
     Fetch.HeadersInit.make({
       "Content-Type": "application/json",
       "Authorization": "Bearer " ++ jwt,
     });
-  let getResumeRevisionPromise = (user: selfResponse) => {
-    let resumesEndpoint = Constants.resumesUrl ++ "/resumes/" ++ user.id;
-    Js.Promise.(
-      Fetch.fetchWithInit(
-        resumesEndpoint,
-        Fetch.RequestInit.make(~method_=Get, ~headers, ()),
-      )
-      |> then_(Fetch.Response.json)
-      |> then_(json => json |> Decode.resumesArray |> callback |> resolve)
-    );
-  };
-  let selfEndpoint = Constants.authUrl ++ "/users/self";
+  let body =
+    Js.Json.object_(payload) |> Js.Json.stringify |> Fetch.BodyInit.make;
   Js.Promise.(
     Fetch.fetchWithInit(
-      selfEndpoint,
-      Fetch.RequestInit.make(~method_=Get, ~headers, ()),
+      jobAppEndpoint,
+      Fetch.RequestInit.make(~method_=Post, ~body, ~headers, ()),
     )
-    |> then_(Fetch.Response.json)
-    |> then_(json => json |> Decode.selfResponse |> resolve)
-    |> then_(getResumeRevisionPromise)
+    |> then_(response => {
+         let status = response |> Fetch.Response.status;
+         switch (status) {
+         | 200 =>
+           callback();
+           resolve();
+         | _ =>
+           failure();
+           resolve();
+         };
+       })
     |> catch(err => {
          Js.log(err);
          failure();
@@ -115,7 +132,33 @@ let getResumeRevisions = (~jwt, ~callback, ~failure) => {
   |> ignore;
 };
 
-let validateToken = (~jwt, ~callback, ~failure) => {
+let getResumeRevisions = (~id, ~jwt, ~callback, ~failure) => {
+  let headers =
+    Fetch.HeadersInit.make({
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " ++ jwt,
+    });
+  let resumesEndpoint = Constants.resumesUrl ++ "/resumes/" ++ id;
+  Js.log(id);
+  Js.log(jwt);
+  Js.log(resumesEndpoint);
+  Js.Promise.(
+    Fetch.fetchWithInit(
+      resumesEndpoint,
+      Fetch.RequestInit.make(~method_=Get, ~headers, ()),
+    )
+    |> then_(Fetch.Response.json)
+    |> then_(json => json |> Decode.resumesArray |> callback |> resolve)
+    |> catch(err => {
+         Js.log(err);
+         failure();
+         resolve();
+       })
+  )
+  |> ignore;
+};
+
+let validateToken = (~jwt, ~callback) => {
   let selfEndpoint = Constants.authUrl ++ "/users/self";
   let headers =
     Fetch.HeadersInit.make({
@@ -132,17 +175,16 @@ let validateToken = (~jwt, ~callback, ~failure) => {
          switch (status) {
          | 200 =>
            callback(Js.Option.some(jwt));
-           resolve(true);
+           resolve();
          | _ =>
-           failure(jwt);
-           resolve(false);
+           callback(None);
+           resolve();
          };
        })
     |> catch(err => {
          Js.log(err);
          callback(None);
-         failure(jwt);
-         resolve(false);
+         resolve();
        })
   )
   |> ignore;
@@ -156,8 +198,8 @@ let loadCompanyNames = callback =>
          json |> Decode.companiesArray |> (el => callback(el));
          resolve();
        })
-    |> catch(_err => {
-         Js.log(_err);
+    |> catch(err => {
+         Js.log(err);
          Js.Promise.resolve();
        })
   )

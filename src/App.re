@@ -1,11 +1,11 @@
 type state = {
-  validatedToken: bool,
+  id: option(string),
   token: option(string),
 };
 
 type action =
-  | DidMount(option(string))
-  | Login(option(string))
+  | DidMount(option(string), option(string))
+  | Login(option(string), option(string))
   | Logout;
 
 let component = ReasonReact.reducerComponent("App");
@@ -14,32 +14,55 @@ let make = _children => {
   ...component,
   reducer: (action, _state) =>
     switch (action) {
-    | DidMount(maybeJwt) =>
-      ReasonReact.Update({validatedToken: true, token: maybeJwt})
-    | Login(maybeJwt) =>
+    | DidMount(maybeId, maybeJwt) =>
+      ReasonReact.Update({id: maybeId, token: maybeJwt})
+    | Login(maybeId, maybeJwt) =>
       ReasonReact.UpdateWithSideEffects(
-        {..._state, token: maybeJwt},
-        (_self => SyncStorage.refreshToken(maybeJwt)),
+        {id: maybeId, token: maybeJwt},
+        (
+          _self => {
+            SyncStorage.refreshId(maybeId);
+            SyncStorage.refreshToken(maybeJwt);
+          }
+        ),
       )
     | Logout =>
       ReasonReact.UpdateWithSideEffects(
-        {..._state, token: None},
+        {id: None, token: None},
         (_self => SyncStorage.clear()),
       )
     },
-  initialState: () => {validatedToken: false, token: None},
+  initialState: () => {id: None, token: None},
   didMount: self => {
-    let handleRetrievedToken = maybeJwt => DidMount(maybeJwt) |> self.send;
+    let handleExpiredToken = () => self.send(Logout);
+    let handleRetrievedId = (maybeId, maybeJwt) =>
+      DidMount(maybeId, maybeJwt) |> self.send;
+    let handleValidToken =
+      fun
+      | Some(jwt) =>
+        Js.Promise.(
+          SyncStorage.getSavedId()
+          |> then_(maybeId =>
+               switch (maybeId) {
+               | Some(id) =>
+                 handleRetrievedId(Js.Option.some(id), Js.Option.some(jwt));
+                 resolve();
+               | None =>
+                 handleExpiredToken();
+                 resolve();
+               }
+             )
+          |> resolve
+        )
+        |> ignore
+      | None => handleExpiredToken();
     Js.Promise.(
       SyncStorage.getSavedToken()
       |> then_(maybeJwt => {
            switch (maybeJwt) {
            | Some(jwt) =>
-             Services.validateToken(
-               ~jwt, ~callback=handleRetrievedToken, ~failure=x =>
-               x |> Js.log
-             )
-           | None => handleRetrievedToken(maybeJwt)
+             Services.validateToken(~jwt, ~callback=handleValidToken)
+           | None => handleExpiredToken()
            };
            resolve();
          })
@@ -50,20 +73,21 @@ let make = _children => {
   render: self =>
     <div className="app">
       (
-        self.state.validatedToken ?
-          switch (self.state.token) {
-          | None =>
-            <Login
-              updateToken=(maybeToken => Login(maybeToken) |> self.send)
-            />
-          | Some(token) =>
-            <JobApp
-              submitHandler=(_event => self.send(Logout))
-              signOutHandler=(_event => self.send(Logout))
-              jwt=token
-            />
-          } :
-          <div />
+        switch (self.state.token) {
+        | None =>
+          <Login
+            updateAuth=(
+              (maybeId, maybeToken) =>
+                Login(maybeId, maybeToken) |> self.send
+            )
+          />
+        | Some(token) =>
+          <JobApp
+            signOutHandler=(_event => self.send(Logout))
+            id=(Belt.Option.getWithDefault(self.state.id, ""))
+            jwt=token
+          />
+        }
       )
     </div>,
 };
