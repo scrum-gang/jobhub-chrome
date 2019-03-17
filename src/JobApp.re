@@ -34,45 +34,20 @@ type action =
 let reducer = (action, state) =>
   switch (action) {
   | UpdateUrl(value) =>
-    ReasonReact.Update({...state, url: value, loading: false, error: false})
+    ReasonReact.Update({...state, url: value, error: false})
   | UpdateCompany(value) =>
-    ReasonReact.Update({
-      ...state,
-      company: value,
-      loading: false,
-      error: false,
-    })
+    ReasonReact.Update({...state, company: value, error: false})
   | UpdatePosition(value) =>
-    ReasonReact.Update({
-      ...state,
-      position: value,
-      loading: false,
-      error: false,
-    })
+    ReasonReact.Update({...state, position: value, error: false})
   | UpdatePostedDate(value) =>
-    ReasonReact.Update({
-      ...state,
-      postedDate: value,
-      loading: false,
-      error: false,
-    })
+    ReasonReact.Update({...state, postedDate: value, error: false})
   | UpdateDeadline(value) =>
-    ReasonReact.Update({
-      ...state,
-      deadline: value,
-      loading: false,
-      error: false,
-    })
+    ReasonReact.Update({...state, deadline: value, error: false})
   | UpdateCompanyNames(value) =>
     ReasonReact.Update({...state, companies: value})
   | UpdateResumes(value) => ReasonReact.Update({...state, resumes: value})
   | UpdateResumeValue(value) =>
-    ReasonReact.Update({
-      ...state,
-      resumeValue: value,
-      loading: false,
-      error: false,
-    })
+    ReasonReact.Update({...state, resumeValue: value, error: false})
   | Submit =>
     ReasonReact.UpdateWithSideEffects(
       {...state, loading: true, error: false},
@@ -95,11 +70,6 @@ let reducer = (action, state) =>
   | SuccesfulSubmit =>
     ReasonReact.Update({
       ...state,
-      url: "",
-      company: "",
-      position: "",
-      postedDate: "",
-      deadline: "",
       error: false,
       success: true,
       loading: false,
@@ -107,16 +77,16 @@ let reducer = (action, state) =>
   | FailedSubmit =>
     ReasonReact.Update({
       ...state,
-      loading: false,
       error: true,
       success: false,
+      loading: false,
     })
   };
 
 let component = ReasonReact.reducerComponent("JobApp");
 
 let make = (~signOutHandler, ~id, ~jwt, _children) => {
-  ...component, /* spread the template's other defaults into here  */
+  ...component,
   reducer,
   initialState: () => {
     url: "",
@@ -134,10 +104,9 @@ let make = (~signOutHandler, ~id, ~jwt, _children) => {
     loading: false,
   },
   didMount: self => {
-    let setCompanyNames = x => self.send(UpdateCompanyNames(x));
-    let setResumes = x => self.send(UpdateResumes(x));
-    ReasonReact.UpdateWithSideEffects(
-      self.state,
+    let setCompanyNames = x => UpdateCompanyNames(x) |> self.send;
+    let setResumes = x => UpdateResumes(x) |> self.send;
+    ReasonReact.SideEffects(
       _self => {
         /** Fetch all data required for the form */
         Services.loadCompanyNames(setCompanyNames);
@@ -150,12 +119,12 @@ let make = (~signOutHandler, ~id, ~jwt, _children) => {
   },
   render: self => {
     /** Event handlers which function as sort of dispatchers */
-    let changeUrl = x => self.send(UpdateUrl(x));
-    let changeCompany = x => self.send(UpdateCompany(x));
-    let changePosition = x => self.send(UpdatePosition(x));
-    let changePostedDate = x => self.send(UpdatePostedDate(x));
-    let changeDeadline = x => self.send(UpdateDeadline(x));
-    let changeResumeValue = x => self.send(UpdateResumeValue(x));
+    let changeUrl = x => UpdateUrl(x) |> self.send;
+    let changeCompany = x => UpdateCompany(x) |> self.send;
+    let changePosition = x => UpdatePosition(x) |> self.send;
+    let changePostedDate = x => UpdatePostedDate(x) |> self.send;
+    let changeDeadline = x => UpdateDeadline(x) |> self.send;
+    let changeResumeValue = x => UpdateResumeValue(x) |> self.send;
     let errorMessage = self.state.error ? "Failed to add application" : "";
     let successMessage = self.state.success ? "Added application" : "";
     self.state.loading ?

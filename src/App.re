@@ -34,7 +34,7 @@ let make = _children => {
     },
   initialState: () => {id: None, token: None},
   didMount: self => {
-    let handleExpiredToken = () => self.send(Logout);
+    let handleExpiredToken = () => Logout |> self.send;
     let handleRetrievedId = (maybeId, maybeJwt) =>
       DidMount(maybeId, maybeJwt) |> self.send;
     let handleValidToken =

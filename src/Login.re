@@ -23,16 +23,10 @@ let make = (~updateAuth, _children) => {
   reducer: (action, state) =>
     switch (action) {
     | UpdateEmail(email) =>
-      ReasonReact.Update({...state, email, loading: false, error: false})
+      ReasonReact.Update({...state, email, error: false})
     | UpdatePassword(pass) =>
-      ReasonReact.Update({
-        ...state,
-        password: pass,
-        loading: false,
-        error: false,
-      })
-    | DisplayError =>
-      ReasonReact.Update({...state, loading: false, error: true})
+      ReasonReact.Update({...state, password: pass, error: false})
+    | DisplayError => ReasonReact.Update({...state, error: true})
     | Login =>
       ReasonReact.UpdateWithSideEffects(
         {...state, loading: true, error: false},
