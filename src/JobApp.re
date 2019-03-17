@@ -11,6 +11,7 @@ type state = {
   companies: array(string),
   resumes: array(resume),
   resumeValue: string,
+  status: string,
   id: string,
   jwt: string,
   error: bool,
@@ -27,6 +28,7 @@ type action =
   | UpdateCompanyNames(array(string))
   | UpdateResumes(array(resume))
   | UpdateResumeValue(string)
+  | UpdateStatus(string)
   | Submit
   | SuccesfulSubmit
   | FailedSubmit;
@@ -48,6 +50,8 @@ let reducer = (action, state) =>
   | UpdateResumes(value) => ReasonReact.Update({...state, resumes: value})
   | UpdateResumeValue(value) =>
     ReasonReact.Update({...state, resumeValue: value, error: false})
+  | UpdateStatus(value) =>
+    ReasonReact.Update({...state, status: value, error: false})
   | Submit =>
     ReasonReact.UpdateWithSideEffects(
       {...state, loading: true, error: false},
@@ -60,6 +64,7 @@ let reducer = (action, state) =>
             ~resume=state.resumeValue,
             ~date_posted=state.postedDate,
             ~deadline=state.deadline,
+            ~status=state.status,
             ~id=state.id,
             ~jwt=state.jwt,
             ~callback=() => self.send(SuccesfulSubmit),
@@ -97,6 +102,7 @@ let make = (~signOutHandler, ~id, ~jwt, _children) => {
     companies: [||],
     resumes: [||],
     resumeValue: "",
+    status: "",
     id,
     jwt,
     error: false,
@@ -125,6 +131,7 @@ let make = (~signOutHandler, ~id, ~jwt, _children) => {
     let changePostedDate = x => UpdatePostedDate(x) |> self.send;
     let changeDeadline = x => UpdateDeadline(x) |> self.send;
     let changeResumeValue = x => UpdateResumeValue(x) |> self.send;
+    let changeStatusValue = x => UpdateStatus(x) |> self.send;
     let errorMessage = self.state.error ? "Failed to add application" : "";
     let successMessage = self.state.success ? "Added application" : "";
     self.state.loading ?
@@ -158,6 +165,7 @@ let make = (~signOutHandler, ~id, ~jwt, _children) => {
                 name="company"
                 placeholder="company"
                 value=self.state.company
+                required=(Js.Boolean.to_js_boolean(true))
               />
             }
           )
@@ -170,6 +178,7 @@ let make = (~signOutHandler, ~id, ~jwt, _children) => {
             name="position"
             placeholder="position"
             value=self.state.position
+            required=(Js.Boolean.to_js_boolean(true))
           />
           <ScrapingInput
             script=ScrapingFunctions.scriptUrl
@@ -180,6 +189,7 @@ let make = (~signOutHandler, ~id, ~jwt, _children) => {
             name="url"
             placeholder="url"
             value=self.state.url
+            required=(Js.Boolean.to_js_boolean(true))
           />
           <div className="form-horizontal-separator">
             <label> ("Date posted" |> str) </label>
@@ -192,6 +202,7 @@ let make = (~signOutHandler, ~id, ~jwt, _children) => {
               name="postedDate"
               placeholder=""
               value=self.state.postedDate
+              required=(Js.Boolean.to_js_boolean(false))
             />
           </div>
           <div className="form-horizontal-separator">
@@ -205,11 +216,21 @@ let make = (~signOutHandler, ~id, ~jwt, _children) => {
           </div>
           <div className="form-horizontal-separator">
             <label>
-              <input _type="radio" name="status" value="applied" />
+              <input
+                _type="radio"
+                name="status"
+                value="applied"
+                onChange=(ev => valueFromEvent(ev) |> changeStatusValue)
+              />
               ("Applied" |> str)
             </label>
             <label>
-              <input _type="radio" name="status" value="toApply" />
+              <input
+                _type="radio"
+                name="status"
+                value="toApply"
+                onChange=(ev => valueFromEvent(ev) |> changeStatusValue)
+              />
               ("To apply" |> str)
             </label>
           </div>

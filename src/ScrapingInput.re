@@ -43,6 +43,7 @@ let make =
       ~name,
       ~placeholder,
       ~value,
+      ~required,
       _children,
     ) => {
   ...component,
@@ -59,5 +60,6 @@ let make =
       /*** Ideally, I would've passed a separate prop such as a "dispatcher" function,
            but honestly for the complexity of our app, I wouldn't bother  */
       onChange=(evt => Utilities.valueFromEvent(evt) |> reducerFn)
+      required
     />,
 };

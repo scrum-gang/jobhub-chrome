@@ -101,6 +101,7 @@ let submitApplication =
       ~resume,
       ~date_posted,
       ~deadline,
+      ~status,
       ~id,
       ~jwt,
       ~callback,
@@ -115,6 +116,7 @@ let submitApplication =
   Js.Dict.set(payload, "resume", Js.Json.string(resume));
   Js.Dict.set(payload, "date_posted", Js.Json.string(date_posted));
   Js.Dict.set(payload, "deadline", Js.Json.string(deadline));
+  Js.Dict.set(payload, "status", Js.Json.string(status));
   let headers =
     Fetch.HeadersInit.make({
       "Content-Type": "application/json",
@@ -135,6 +137,7 @@ let submitApplication =
       ),
     )
     |> then_(response => {
+         Js.log(response);
          let status = response |> Fetch.Response.status;
          switch (status) {
          | 200 =>
