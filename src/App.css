@@ -169,3 +169,45 @@ select:active {
   margin: 5px 0;
   font-weight: 800;
 }
+.success-message {
+  color: #10ac2a;
+  margin: 5px 0;
+  font-weight: 800;
+}
+
+.loader {
+  border: 16px solid var(--baseBg);
+  border-radius: 50%;
+  border-top: 16px solid var(--positiveBg);
+  width: 120px;
+  height: 120px;
+  -webkit-animation: spin 1.5s linear infinite; /* Safari */
+  animation: spin 1.5s linear infinite;
+}
+
+/* Safari */
+@-webkit-keyframes spin {
+  0% { -webkit-transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.login-size {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 320px;
+  height: 239px;
+}
+
+.jobapp-size {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 320px;
+  height: 465.98px;
+}

@@ -14,6 +14,8 @@ type state = {
   id: string,
   jwt: string,
   error: bool,
+  success: bool,
+  loading: bool,
 };
 
 type action =
@@ -32,23 +34,48 @@ type action =
 let reducer = (action, state) =>
   switch (action) {
   | UpdateUrl(value) =>
-    ReasonReact.Update({...state, url: value, error: false})
+    ReasonReact.Update({...state, url: value, loading: false, error: false})
   | UpdateCompany(value) =>
-    ReasonReact.Update({...state, company: value, error: false})
+    ReasonReact.Update({
+      ...state,
+      company: value,
+      loading: false,
+      error: false,
+    })
   | UpdatePosition(value) =>
-    ReasonReact.Update({...state, position: value, error: false})
+    ReasonReact.Update({
+      ...state,
+      position: value,
+      loading: false,
+      error: false,
+    })
   | UpdatePostedDate(value) =>
-    ReasonReact.Update({...state, postedDate: value, error: false})
+    ReasonReact.Update({
+      ...state,
+      postedDate: value,
+      loading: false,
+      error: false,
+    })
   | UpdateDeadline(value) =>
-    ReasonReact.Update({...state, deadline: value, error: false})
+    ReasonReact.Update({
+      ...state,
+      deadline: value,
+      loading: false,
+      error: false,
+    })
   | UpdateCompanyNames(value) =>
     ReasonReact.Update({...state, companies: value})
   | UpdateResumes(value) => ReasonReact.Update({...state, resumes: value})
   | UpdateResumeValue(value) =>
-    ReasonReact.Update({...state, resumeValue: value, error: false})
+    ReasonReact.Update({
+      ...state,
+      resumeValue: value,
+      loading: false,
+      error: false,
+    })
   | Submit =>
     ReasonReact.UpdateWithSideEffects(
-      {...state, error: false},
+      {...state, loading: true, error: false},
       (
         self =>
           Services.submitApplication(
@@ -74,8 +101,16 @@ let reducer = (action, state) =>
       postedDate: "",
       deadline: "",
       error: false,
+      success: true,
+      loading: false,
     })
-  | FailedSubmit => ReasonReact.Update({...state, error: true})
+  | FailedSubmit =>
+    ReasonReact.Update({
+      ...state,
+      loading: false,
+      error: true,
+      success: false,
+    })
   };
 
 let component = ReasonReact.reducerComponent("JobApp");
@@ -95,6 +130,8 @@ let make = (~signOutHandler, ~id, ~jwt, _children) => {
     id,
     jwt,
     error: false,
+    success: false,
+    loading: false,
   },
   didMount: self => {
     let setCompanyNames = x => self.send(UpdateCompanyNames(x));
@@ -120,113 +157,119 @@ let make = (~signOutHandler, ~id, ~jwt, _children) => {
     let changeDeadline = x => self.send(UpdateDeadline(x));
     let changeResumeValue = x => self.send(UpdateResumeValue(x));
     let errorMessage = self.state.error ? "Failed to add application" : "";
-    <div>
-      <form
-        onSubmit=(
-          ev => {
-            ReactEventRe.Form.preventDefault(ev);
-            self.send(Submit);
-          }
-        )>
-        <p className="error-message"> (errorMessage |> str) </p>
-        (
-          switch (self.state.companies) {
-          | [||] => "Loading" |> str
-          | _ =>
+    let successMessage = self.state.success ? "Added application" : "";
+    self.state.loading ?
+      <div className="jobapp-size"> <div className="loader" /> </div> :
+      <div>
+        <form
+          onSubmit=(
+            ev => {
+              ReactEventRe.Form.preventDefault(ev);
+              self.send(Submit);
+            }
+          )>
+          <p className="error-message"> (errorMessage |> str) </p>
+          <p className="success-message"> (successMessage |> str) </p>
+          (
+            switch (self.state.companies) {
+            | [||] => "Loading" |> str
+            | _ =>
+              <ScrapingInput
+                script=ScrapingFunctions.scriptHtmlBody
+                typeValue="text"
+                validationFn=ScrapingFunctions.validateNonNull
+                processFn=(
+                  x =>
+                    ScrapingFunctions.extractCompaniesProcess(
+                      self.state.companies,
+                      x,
+                    )
+                )
+                reducerFn=changeCompany
+                name="company"
+                placeholder="company"
+                value=self.state.company
+              />
+            }
+          )
+          <ScrapingInput
+            script=ScrapingFunctions.scriptPosition
+            typeValue="text"
+            validationFn=ScrapingFunctions.validateNonNull
+            processFn=ScrapingFunctions.toStringProcess
+            reducerFn=changePosition
+            name="position"
+            placeholder="position"
+            value=self.state.position
+          />
+          <ScrapingInput
+            script=ScrapingFunctions.scriptUrl
+            typeValue="url"
+            validationFn=ScrapingFunctions.validateUrl
+            processFn=ScrapingFunctions.toStringProcess
+            reducerFn=changeUrl
+            name="url"
+            placeholder="url"
+            value=self.state.url
+          />
+          <div className="form-horizontal-separator">
+            <label> ("Date posted" |> str) </label>
             <ScrapingInput
               script=ScrapingFunctions.scriptHtmlBody
-              typeValue="text"
-              validationFn=ScrapingFunctions.validateNonNull
-              processFn=(
-                x =>
-                  ScrapingFunctions.extractCompaniesProcess(
-                    self.state.companies,
-                    x,
-                  )
-              )
-              reducerFn=changeCompany
-              name="company"
-              placeholder="company"
-              value=self.state.company
+              typeValue="date"
+              validationFn=ScrapingFunctions.validateDate
+              processFn=ScrapingFunctions.extractPostedDateProcess
+              reducerFn=changePostedDate
+              name="postedDate"
+              placeholder=""
+              value=self.state.postedDate
             />
-          }
-        )
-        <ScrapingInput
-          script=ScrapingFunctions.scriptPosition
-          typeValue="text"
-          validationFn=ScrapingFunctions.validateNonNull
-          processFn=ScrapingFunctions.toStringProcess
-          reducerFn=changePosition
-          name="position"
-          placeholder="position"
-          value=self.state.position
-        />
-        <ScrapingInput
-          script=ScrapingFunctions.scriptUrl
-          typeValue="url"
-          validationFn=ScrapingFunctions.validateUrl
-          processFn=ScrapingFunctions.toStringProcess
-          reducerFn=changeUrl
-          name="url"
-          placeholder="url"
-          value=self.state.url
-        />
-        <div className="form-horizontal-separator">
-          <label> ("Date posted" |> str) </label>
-          <ScrapingInput
-            script=ScrapingFunctions.scriptHtmlBody
-            typeValue="date"
-            validationFn=ScrapingFunctions.validateDate
-            processFn=ScrapingFunctions.extractPostedDateProcess
-            reducerFn=changePostedDate
-            name="postedDate"
-            placeholder=""
-            value=self.state.postedDate
-          />
-        </div>
-        <div className="form-horizontal-separator">
-          <label> ("Deadline" |> str) </label>
-          <input
-            _type="date"
-            name="deadline"
-            value=self.state.deadline
-            onChange=(ev => ev |> Utilities.valueFromEvent |> changeDeadline)
-          />
-        </div>
-        <div className="form-horizontal-separator">
-          <label>
-            <input _type="radio" name="status" value="applied" />
-            ("Applied" |> str)
-          </label>
-          <label>
-            <input _type="radio" name="status" value="toApply" />
-            ("To apply" |> str)
-          </label>
-        </div>
-        <select
-          id="resumes"
-          value=self.state.resumeValue
-          onChange=(evt => Utilities.valueFromEvent(evt) |> changeResumeValue)>
-          <option key="" value=""> ("CV used" |> str) </option>
-          (
-            ReasonReact.arrayToElement(
-              self.state.resumes
-              |> Array.map((el: resume) =>
-                   <option key=el.id value=el.id>
-                     (el.title ++ " " ++ el.revision |> str)
-                   </option>
-                 ),
+          </div>
+          <div className="form-horizontal-separator">
+            <label> ("Deadline" |> str) </label>
+            <input
+              _type="date"
+              name="deadline"
+              value=self.state.deadline
+              onChange=(ev => ev |> Utilities.valueFromEvent |> changeDeadline)
+            />
+          </div>
+          <div className="form-horizontal-separator">
+            <label>
+              <input _type="radio" name="status" value="applied" />
+              ("Applied" |> str)
+            </label>
+            <label>
+              <input _type="radio" name="status" value="toApply" />
+              ("To apply" |> str)
+            </label>
+          </div>
+          <select
+            id="resumes"
+            value=self.state.resumeValue
+            onChange=(
+              evt => Utilities.valueFromEvent(evt) |> changeResumeValue
+            )>
+            <option key="" value=""> ("CV used" |> str) </option>
+            (
+              ReasonReact.arrayToElement(
+                self.state.resumes
+                |> Array.map((el: resume) =>
+                     <option key=el.id value=el.id>
+                       (el.title ++ " " ++ el.revision |> str)
+                     </option>
+                   ),
+              )
             )
-          )
-        </select>
-        <button className="btn submit-btn"> ("Submit" |> str) </button>
-        <span className="form-vertical-separator">
-          <p className="form-vertical-separator-txt"> ("or" |> str) </p>
-        </span>
-        <button className="btn signout-btn" onClick=signOutHandler>
-          ("Sign Out" |> str)
-        </button>
-      </form>
-    </div>;
+          </select>
+          <button className="btn submit-btn"> ("Submit" |> str) </button>
+          <span className="form-vertical-separator">
+            <p className="form-vertical-separator-txt"> ("or" |> str) </p>
+          </span>
+          <button className="btn signout-btn" onClick=signOutHandler>
+            ("Sign Out" |> str)
+          </button>
+        </form>
+      </div>;
   },
 };

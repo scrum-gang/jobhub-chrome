@@ -4,6 +4,7 @@ type state = {
   email: string,
   password: string,
   error: bool,
+  loading: bool,
 };
 
 type action =
@@ -22,13 +23,19 @@ let make = (~updateAuth, _children) => {
   reducer: (action, state) =>
     switch (action) {
     | UpdateEmail(email) =>
-      ReasonReact.Update({...state, email, error: false})
+      ReasonReact.Update({...state, email, loading: false, error: false})
     | UpdatePassword(pass) =>
-      ReasonReact.Update({...state, password: pass, error: false})
-    | DisplayError => ReasonReact.Update({...state, error: true})
+      ReasonReact.Update({
+        ...state,
+        password: pass,
+        loading: false,
+        error: false,
+      })
+    | DisplayError =>
+      ReasonReact.Update({...state, loading: false, error: true})
     | Login =>
       ReasonReact.UpdateWithSideEffects(
-        {...state, error: false},
+        {...state, loading: true, error: false},
         (
           self => {
             let _ =
@@ -44,47 +51,55 @@ let make = (~updateAuth, _children) => {
         ),
       )
     },
-  initialState: () => {email: "", password: "", error: false},
+  initialState: () => {email: "", password: "", loading: false, error: false},
   render: self => {
     let errorMessage = self.state.error ? "Invalid credentials" : "";
     <div>
-      <form onSubmit=openRegisterPage>
-        <button className="btn submit-btn" tabIndex=1>
-          ("Register" |> str)
-        </button>
-      </form>
-      <span className="form-vertical-separator">
-        <p className="form-vertical-separator-txt"> ("or" |> str) </p>
-      </span>
-      <p className="error-message"> (errorMessage |> str) </p>
-      <form
-        onSubmit=(
-          ev => {
-            ReactEventRe.Form.preventDefault(ev);
-            self.send(Login);
-          }
-        )>
-        <input
-          name="email"
-          placeholder="email"
-          value=self.state.email
-          required=(true |> bool)
-          tabIndex=2
-          onChange=(ev => UpdateEmail(valueFromEvent(ev)) |> self.send)
-        />
-        <input
-          _type="password"
-          name="password"
-          placeholder="password"
-          value=self.state.password
-          required=(true |> bool)
-          tabIndex=3
-          onChange=(ev => UpdatePassword(valueFromEvent(ev)) |> self.send)
-        />
-        <button className="btn submit-btn" tabIndex=4>
-          ("Sign In" |> str)
-        </button>
-      </form>
+      (
+        self.state.loading ?
+          <div className="login-size"> <div className="loader" /> </div> :
+          <div>
+            <form onSubmit=openRegisterPage>
+              <button className="btn submit-btn" tabIndex=1>
+                ("Register" |> str)
+              </button>
+            </form>
+            <span className="form-vertical-separator">
+              <p className="form-vertical-separator-txt"> ("or" |> str) </p>
+            </span>
+            <p className="error-message"> (errorMessage |> str) </p>
+            <form
+              onSubmit=(
+                ev => {
+                  ReactEventRe.Form.preventDefault(ev);
+                  self.send(Login);
+                }
+              )>
+              <input
+                name="email"
+                placeholder="email"
+                value=self.state.email
+                required=(true |> bool)
+                tabIndex=2
+                onChange=(ev => UpdateEmail(valueFromEvent(ev)) |> self.send)
+              />
+              <input
+                _type="password"
+                name="password"
+                placeholder="password"
+                value=self.state.password
+                required=(true |> bool)
+                tabIndex=3
+                onChange=(
+                  ev => UpdatePassword(valueFromEvent(ev)) |> self.send
+                )
+              />
+              <button className="btn submit-btn" tabIndex=4>
+                ("Sign In" |> str)
+              </button>
+            </form>
+          </div>
+      )
     </div>;
   },
 };
