@@ -52,7 +52,11 @@ let make = _children => {
                  resolve();
                }
              )
-          |> resolve
+          |> catch(err => {
+               Js.log(err);
+               handleExpiredToken();
+               resolve();
+             })
         )
         |> ignore
       | None => handleExpiredToken();
@@ -64,6 +68,11 @@ let make = _children => {
              Services.validateToken(~jwt, ~callback=handleValidToken)
            | None => handleExpiredToken()
            };
+           resolve();
+         })
+      |> catch(err => {
+           Js.log(err);
+           handleExpiredToken();
            resolve();
          })
     )

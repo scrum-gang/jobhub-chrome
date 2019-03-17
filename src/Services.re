@@ -16,7 +16,7 @@ type selfResponse = {
 };
 
 type resume = {
-  id: int,
+  id: string,
   title: string,
   revision: string,
   username: string,
@@ -46,7 +46,7 @@ module Decode = {
     };
   let resumeRevision = json : resume =>
     Json.Decode.{
-      id: json |> field("id", int),
+      id: json |> field("id", int) |> string_of_int,
       title: json |> field("title", string),
       revision: json |> field("revision", string),
       username: json |> field("user_name", string),
@@ -94,23 +94,45 @@ let authenticate = (~email, ~password, ~callback, ~failure, _self) => {
 };
 
 let submitApplication =
-    (~company, ~position, ~url, ~id, ~jwt, ~callback, ~failure) => {
+    (
+      ~company,
+      ~position,
+      ~url,
+      ~resume,
+      ~date_posted,
+      ~deadline,
+      ~id,
+      ~jwt,
+      ~callback,
+      ~failure,
+    ) => {
   let jobAppEndpoint = Constants.jobAppUrl ++ "/apply/external";
   let payload = Js.Dict.empty();
+  Js.Dict.set(payload, "user_id", Js.Json.string(id));
   Js.Dict.set(payload, "company", Js.Json.string(company));
   Js.Dict.set(payload, "position", Js.Json.string(position));
   Js.Dict.set(payload, "url", Js.Json.string(url));
+  Js.Dict.set(payload, "resume", Js.Json.string(resume));
+  Js.Dict.set(payload, "date_posted", Js.Json.string(date_posted));
+  Js.Dict.set(payload, "deadline", Js.Json.string(deadline));
   let headers =
     Fetch.HeadersInit.make({
       "Content-Type": "application/json",
       "Authorization": "Bearer " ++ jwt,
     });
+  Js.log(payload);
   let body =
     Js.Json.object_(payload) |> Js.Json.stringify |> Fetch.BodyInit.make;
   Js.Promise.(
     Fetch.fetchWithInit(
       jobAppEndpoint,
-      Fetch.RequestInit.make(~method_=Post, ~body, ~headers, ()),
+      Fetch.RequestInit.make(
+        ~method_=Post,
+        ~body,
+        ~headers,
+        ~mode=Fetch.CORS,
+        (),
+      ),
     )
     |> then_(response => {
          let status = response |> Fetch.Response.status;
@@ -141,13 +163,12 @@ let getResumeRevisions = (~id, ~jwt, ~callback, ~failure) => {
   let resumesEndpoint = Constants.resumesUrl ++ "/resumes/" ++ id;
   Js.log(id);
   Js.log(jwt);
-  Js.log(resumesEndpoint);
   Js.Promise.(
     Fetch.fetchWithInit(
       resumesEndpoint,
-      Fetch.RequestInit.make(~method_=Get, ~headers, ()),
+      Fetch.RequestInit.make(~method_=Get, ~headers, ~mode=Fetch.CORS, ()),
     )
-    |> then_(Fetch.Response.json)
+    |> then_(response => Fetch.Response.json(response))
     |> then_(json => json |> Decode.resumesArray |> callback |> resolve)
     |> catch(err => {
          Js.log(err);
@@ -171,6 +192,7 @@ let validateToken = (~jwt, ~callback) => {
       Fetch.RequestInit.make(~method_=Get, ~headers, ()),
     )
     |> then_(response => {
+         Js.log(response);
          let status = response |> Fetch.Response.status;
          switch (status) {
          | 200 =>

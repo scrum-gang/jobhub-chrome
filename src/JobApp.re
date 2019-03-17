@@ -7,9 +7,10 @@ type state = {
   company: string,
   position: string,
   postedDate: string,
+  deadline: string,
   companies: array(string),
   resumes: array(resume),
-  resumeValue: int,
+  resumeValue: string,
   id: string,
   jwt: string,
   error: bool,
@@ -20,9 +21,10 @@ type action =
   | UpdateCompany(string)
   | UpdatePosition(string)
   | UpdatePostedDate(string)
+  | UpdateDeadline(string)
   | UpdateCompanyNames(array(string))
   | UpdateResumes(array(resume))
-  | UpdateResumeValue(int)
+  | UpdateResumeValue(string)
   | Submit
   | SuccesfulSubmit
   | FailedSubmit;
@@ -37,6 +39,8 @@ let reducer = (action, state) =>
     ReasonReact.Update({...state, position: value, error: false})
   | UpdatePostedDate(value) =>
     ReasonReact.Update({...state, postedDate: value, error: false})
+  | UpdateDeadline(value) =>
+    ReasonReact.Update({...state, deadline: value, error: false})
   | UpdateCompanyNames(value) =>
     ReasonReact.Update({...state, companies: value})
   | UpdateResumes(value) => ReasonReact.Update({...state, resumes: value})
@@ -51,6 +55,9 @@ let reducer = (action, state) =>
             ~company=state.company,
             ~position=state.position,
             ~url=state.url,
+            ~resume=state.resumeValue,
+            ~date_posted=state.postedDate,
+            ~deadline=state.deadline,
             ~id=state.id,
             ~jwt=state.jwt,
             ~callback=() => self.send(SuccesfulSubmit),
@@ -64,6 +71,8 @@ let reducer = (action, state) =>
       url: "",
       company: "",
       position: "",
+      postedDate: "",
+      deadline: "",
       error: false,
     })
   | FailedSubmit => ReasonReact.Update({...state, error: true})
@@ -79,9 +88,10 @@ let make = (~signOutHandler, ~id, ~jwt, _children) => {
     company: "",
     position: "",
     postedDate: "",
+    deadline: "",
     companies: [||],
     resumes: [||],
-    resumeValue: (-1),
+    resumeValue: "",
     id,
     jwt,
     error: false,
@@ -107,6 +117,7 @@ let make = (~signOutHandler, ~id, ~jwt, _children) => {
     let changeCompany = x => self.send(UpdateCompany(x));
     let changePosition = x => self.send(UpdatePosition(x));
     let changePostedDate = x => self.send(UpdatePostedDate(x));
+    let changeDeadline = x => self.send(UpdateDeadline(x));
     let changeResumeValue = x => self.send(UpdateResumeValue(x));
     let errorMessage = self.state.error ? "Failed to add application" : "";
     <div>
@@ -175,7 +186,12 @@ let make = (~signOutHandler, ~id, ~jwt, _children) => {
         </div>
         <div className="form-horizontal-separator">
           <label> ("Deadline" |> str) </label>
-          <input _type="date" name="deadline" />
+          <input
+            _type="date"
+            name="deadline"
+            value=self.state.deadline
+            onChange=(ev => ev |> Utilities.valueFromEvent |> changeDeadline)
+          />
         </div>
         <div className="form-horizontal-separator">
           <label>
@@ -188,18 +204,15 @@ let make = (~signOutHandler, ~id, ~jwt, _children) => {
           </label>
         </div>
         <select
-          value=(string_of_int(self.state.resumeValue))
-          onChange=(
-            evt =>
-              Utilities.valueFromEvent(evt)
-              |> int_of_float
-              |> changeResumeValue
-          )>
+          id="resumes"
+          value=self.state.resumeValue
+          onChange=(evt => Utilities.valueFromEvent(evt) |> changeResumeValue)>
+          <option key="" value=""> ("CV used" |> str) </option>
           (
             ReasonReact.arrayToElement(
               self.state.resumes
               |> Array.map((el: resume) =>
-                   <option value=(string_of_int(el.id))>
+                   <option key=el.id value=el.id>
                      (el.title ++ " " ++ el.revision |> str)
                    </option>
                  ),
