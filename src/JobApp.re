@@ -17,6 +17,7 @@ type state = {
   error: bool,
   success: bool,
   loading: bool,
+  errorCause: string,
 };
 
 type action =
@@ -31,27 +32,22 @@ type action =
   | UpdateStatus(string)
   | Submit
   | SuccesfulSubmit
-  | FailedSubmit;
+  | FailedSubmit(string);
 
 let reducer = (action, state) =>
   switch (action) {
-  | UpdateUrl(value) =>
-    ReasonReact.Update({...state, url: value, error: false})
-  | UpdateCompany(value) =>
-    ReasonReact.Update({...state, company: value, error: false})
-  | UpdatePosition(value) =>
-    ReasonReact.Update({...state, position: value, error: false})
+  | UpdateUrl(value) => ReasonReact.Update({...state, url: value})
+  | UpdateCompany(value) => ReasonReact.Update({...state, company: value})
+  | UpdatePosition(value) => ReasonReact.Update({...state, position: value})
   | UpdatePostedDate(value) =>
-    ReasonReact.Update({...state, postedDate: value, error: false})
-  | UpdateDeadline(value) =>
-    ReasonReact.Update({...state, deadline: value, error: false})
+    ReasonReact.Update({...state, postedDate: value})
+  | UpdateDeadline(value) => ReasonReact.Update({...state, deadline: value})
   | UpdateCompanyNames(value) =>
     ReasonReact.Update({...state, companies: value})
   | UpdateResumes(value) => ReasonReact.Update({...state, resumes: value})
   | UpdateResumeValue(value) =>
-    ReasonReact.Update({...state, resumeValue: value, error: false})
-  | UpdateStatus(value) =>
-    ReasonReact.Update({...state, status: value, error: false})
+    ReasonReact.Update({...state, resumeValue: value})
+  | UpdateStatus(value) => ReasonReact.Update({...state, status: value})
   | Submit =>
     ReasonReact.UpdateWithSideEffects(
       {...state, loading: true, error: false},
@@ -68,7 +64,7 @@ let reducer = (action, state) =>
             ~id=state.id,
             ~jwt=state.jwt,
             ~callback=() => self.send(SuccesfulSubmit),
-            ~failure=() => self.send(FailedSubmit),
+            ~failure=why => self.send(FailedSubmit(why)),
           )
       ),
     )
@@ -79,12 +75,13 @@ let reducer = (action, state) =>
       success: true,
       loading: false,
     })
-  | FailedSubmit =>
+  | FailedSubmit(why) =>
     ReasonReact.Update({
       ...state,
       error: true,
       success: false,
       loading: false,
+      errorCause: why,
     })
   };
 
@@ -108,6 +105,7 @@ let make = (~signOutHandler, ~id, ~jwt, _children) => {
     error: false,
     success: false,
     loading: false,
+    errorCause: "",
   },
   didMount: self => {
     let setCompanyNames = x => UpdateCompanyNames(x) |> self.send;
@@ -132,7 +130,9 @@ let make = (~signOutHandler, ~id, ~jwt, _children) => {
     let changeDeadline = x => UpdateDeadline(x) |> self.send;
     let changeResumeValue = x => UpdateResumeValue(x) |> self.send;
     let changeStatusValue = x => UpdateStatus(x) |> self.send;
-    let errorMessage = self.state.error ? "Failed to add application" : "";
+    let errorMessage =
+      self.state.error ?
+        "Failed to add application: " ++ self.state.errorCause : "";
     let successMessage = self.state.success ? "Added application" : "";
     self.state.loading ?
       <div className="jobapp-size"> <div className="loader" /> </div> :
@@ -202,7 +202,7 @@ let make = (~signOutHandler, ~id, ~jwt, _children) => {
               name="postedDate"
               placeholder=""
               value=self.state.postedDate
-              required=(Js.Boolean.to_js_boolean(false))
+              required=(Js.Boolean.to_js_boolean(true))
             />
           </div>
           <div className="form-horizontal-separator">
@@ -211,6 +211,7 @@ let make = (~signOutHandler, ~id, ~jwt, _children) => {
               _type="date"
               name="deadline"
               value=self.state.deadline
+              required=(Js.Boolean.to_js_boolean(true))
               onChange=(ev => ev |> Utilities.valueFromEvent |> changeDeadline)
             />
           </div>
@@ -219,7 +220,8 @@ let make = (~signOutHandler, ~id, ~jwt, _children) => {
               <input
                 _type="radio"
                 name="status"
-                value="applied"
+                value="Applied"
+                required=(Js.Boolean.to_js_boolean(true))
                 onChange=(ev => valueFromEvent(ev) |> changeStatusValue)
               />
               ("Applied" |> str)
@@ -228,7 +230,7 @@ let make = (~signOutHandler, ~id, ~jwt, _children) => {
               <input
                 _type="radio"
                 name="status"
-                value="toApply"
+                value="To apply"
                 onChange=(ev => valueFromEvent(ev) |> changeStatusValue)
               />
               ("To apply" |> str)
@@ -237,6 +239,7 @@ let make = (~signOutHandler, ~id, ~jwt, _children) => {
           <select
             id="resumes"
             value=self.state.resumeValue
+            required=(Js.Boolean.to_js_boolean(true))
             onChange=(
               evt => Utilities.valueFromEvent(evt) |> changeResumeValue
             )>

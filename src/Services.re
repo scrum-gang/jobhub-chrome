@@ -1,5 +1,7 @@
 type userId = {id: string};
 
+type postingExistsResponse = {status: bool};
+
 type authResponse = {
   iat: int,
   exp: int,
@@ -36,6 +38,8 @@ module Decode = {
       token: json |> field("token", string),
       id: json |> field("user", userId),
     };
+  let postingExistsResponse = json : postingExistsResponse =>
+    Json.Decode.{status: json |> field("status", bool)};
   let selfResponse = json : selfResponse =>
     Json.Decode.{
       id: json |> field("_id", string),
@@ -76,10 +80,13 @@ let authenticate = (~email, ~password, ~callback, ~failure, _self) => {
          |> Decode.authResponse
          |> (
            resp =>
-             callback(
-               Js.Option.some(resp.id.id),
-               Js.Option.some(resp.token),
-             )
+             {
+               Js.log(resp);
+               callback(
+                 Js.Option.some(resp.id.id),
+                 Js.Option.some(resp.token),
+               );
+             }
              |> resolve
          )
        )
@@ -93,7 +100,47 @@ let authenticate = (~email, ~password, ~callback, ~failure, _self) => {
   |> ignore;
 };
 
-let submitApplication =
+let checkAlreadyApplied = (~url, ~jwt, ~callback, ~failure) => {
+  let headers =
+    Fetch.HeadersInit.make({
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " ++ jwt,
+    });
+  let jobAppURL = Constants.jobAppUrl ++ "/applications/exists?url=" ++ url;
+  Js.log("HERE " ++ jwt);
+  Js.log("HERE " ++ url);
+  Js.Promise.(
+    Fetch.fetchWithInit(
+      jobAppURL,
+      Fetch.RequestInit.make(~method_=Get, ~headers, ~mode=Fetch.CORS, ()),
+    )
+    |> then_(response => Fetch.Response.json(response))
+    |> then_(json =>
+         json
+         |> Decode.postingExistsResponse
+         |> (
+           res =>
+             res.status ?
+               {
+                 failure("Already applied to this URL");
+                 resolve();
+               } :
+               {
+                 callback();
+                 resolve();
+               }
+         )
+       )
+    |> catch(err => {
+         Js.log(err);
+         failure("Connection Error");
+         resolve();
+       })
+  )
+  |> ignore;
+};
+
+let submit =
     (
       ~company,
       ~position,
@@ -144,18 +191,54 @@ let submitApplication =
            callback();
            resolve();
          | _ =>
-           failure();
+           failure("Connection Error");
            resolve();
          };
        })
     |> catch(err => {
          Js.log(err);
-         failure();
+         failure("Connection Error");
          resolve();
        })
   )
   |> ignore;
 };
+
+let submitApplication =
+    (
+      ~company,
+      ~position,
+      ~url,
+      ~resume,
+      ~date_posted,
+      ~deadline,
+      ~status,
+      ~id,
+      ~jwt,
+      ~callback,
+      ~failure,
+    ) =>
+  /** TODO here before anything check if already applied */
+  checkAlreadyApplied(
+    ~url,
+    ~jwt,
+    ~callback=
+      _ =>
+        submit(
+          ~company,
+          ~position,
+          ~url,
+          ~resume,
+          ~date_posted,
+          ~deadline,
+          ~status,
+          ~id,
+          ~jwt,
+          ~callback,
+          ~failure,
+        ),
+    ~failure,
+  );
 
 let getResumeRevisions = (~id, ~jwt, ~callback, ~failure) => {
   let headers =

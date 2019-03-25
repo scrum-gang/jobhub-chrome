@@ -10,7 +10,7 @@ let linkedinCDNURL = "https://static.licdn.com";
 
 let linkedinCompanyNameLowerCase = "linkedin";
 
-let authUrl = "https://jobhub-authentication.herokuapp.com";
+let authUrl = " https://jobhub-authentication-staging.herokuapp.com";
 
 let jobAppUrl = "https://scrum-gang-job-applications.herokuapp.com";
 
