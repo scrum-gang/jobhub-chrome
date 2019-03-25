@@ -76,10 +76,13 @@ let authenticate = (~email, ~password, ~callback, ~failure, _self) => {
          |> Decode.authResponse
          |> (
            resp =>
-             callback(
-               Js.Option.some(resp.id.id),
-               Js.Option.some(resp.token),
-             )
+             {
+               Js.log(resp);
+               callback(
+                 Js.Option.some(resp.id.id),
+                 Js.Option.some(resp.token),
+               );
+             }
              |> resolve
          )
        )

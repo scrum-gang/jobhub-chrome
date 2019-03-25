@@ -202,7 +202,7 @@ let make = (~signOutHandler, ~id, ~jwt, _children) => {
               name="postedDate"
               placeholder=""
               value=self.state.postedDate
-              required=(Js.Boolean.to_js_boolean(false))
+              required=(Js.Boolean.to_js_boolean(true))
             />
           </div>
           <div className="form-horizontal-separator">
@@ -211,6 +211,7 @@ let make = (~signOutHandler, ~id, ~jwt, _children) => {
               _type="date"
               name="deadline"
               value=self.state.deadline
+              required=(Js.Boolean.to_js_boolean(true))
               onChange=(ev => ev |> Utilities.valueFromEvent |> changeDeadline)
             />
           </div>
@@ -219,7 +220,8 @@ let make = (~signOutHandler, ~id, ~jwt, _children) => {
               <input
                 _type="radio"
                 name="status"
-                value="applied"
+                value="APPLIED"
+                required=(Js.Boolean.to_js_boolean(true))
                 onChange=(ev => valueFromEvent(ev) |> changeStatusValue)
               />
               ("Applied" |> str)
@@ -228,7 +230,7 @@ let make = (~signOutHandler, ~id, ~jwt, _children) => {
               <input
                 _type="radio"
                 name="status"
-                value="toApply"
+                value="TO_APPLY"
                 onChange=(ev => valueFromEvent(ev) |> changeStatusValue)
               />
               ("To apply" |> str)
@@ -237,6 +239,7 @@ let make = (~signOutHandler, ~id, ~jwt, _children) => {
           <select
             id="resumes"
             value=self.state.resumeValue
+            required=(Js.Boolean.to_js_boolean(true))
             onChange=(
               evt => Utilities.valueFromEvent(evt) |> changeResumeValue
             )>
